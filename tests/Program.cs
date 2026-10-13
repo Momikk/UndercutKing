@@ -19,4 +19,17 @@ Check("no data is unknown", PriceRules.Evaluate(listed, null, now, 15), Highligh
 Check("not-yet-loaded price is unknown", PriceRules.Evaluate(listed with { Price = 0 }, market, now, 15), HighlightStatus.Unknown);
 Check("complete empty market is competitive", PriceRules.Evaluate(listed, market with { Nq = null }, now, 15), HighlightStatus.Normal);
 Check("partial market cannot prove absent quality", PriceRules.Evaluate(listed, market with { Nq = null, Complete = false }, now, 15), HighlightStatus.Unknown);
-Console.WriteLine($"PASS: {checks} pricing regression scenarios");
+var snapshots = new List<RetainerSnapshot>
+{
+    new() { CharacterId = 1, RetainerId = 10, Listings = [listed, listed with { Slot = 1 }] },
+    new() { CharacterId = 2, RetainerId = 20, Listings = [listed] },
+};
+HighlightStatus Evaluate(RetainerSnapshot _, Listing value) => PriceRules.Evaluate(value, market, now, 15);
+var summary = UndercutSummary.Count(snapshots, 1, Evaluate);
+if (summary.Undercut != 2 || summary.ScannedRetainers != 1 || summary.BarText != "压价 2") throw new Exception("DTR must count listing slots only for current character");
+snapshots[0].Listings[0] = listed with { Price = 899 };
+if (UndercutSummary.Count(snapshots, 1, Evaluate).Undercut != 1) throw new Exception("DTR did not decrease after repricing");
+if (UndercutSummary.Count(snapshots, 1, (_, _) => HighlightStatus.Unknown).BarText != "压价 ?") throw new Exception("Unknown prices must not report confirmed zero");
+if (new UndercutSummary(2, 1, 1).BarText != "压价 2+") throw new Exception("Partial counts must be marked");
+if (UndercutSummary.Count(snapshots, 0, Evaluate).Undercut != 0) throw new Exception("Logged-out state leaked another character count");
+Console.WriteLine($"PASS: {checks} pricing and 5 DTR regression scenarios");

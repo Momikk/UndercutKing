@@ -19,6 +19,8 @@ internal sealed class MainWindow : Window
     {
         ImGui.TextWrapped("红色：售价高于同品质的市场最低价；黄色：市场数据未知或已过期。改价后自动重新读取售价。仅提示，不自动改价。");
         var config = plugin.Config;
+        var showCount = config.ShowDtrCount;
+        if (ImGui.Checkbox("服务器信息栏显示压价数量", ref showCount)) { config.ShowDtrCount = showCount; plugin.Save(); }
         var item = config.ItemHighlight;
         if (ImGui.Checkbox("高亮雇员销售物品", ref item)) { config.ItemHighlight = item; plugin.Save(); }
         var retainers = config.RetainerHighlight;

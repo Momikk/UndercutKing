@@ -20,6 +20,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IAddonLifecycle Addons { get; private set; } = null!;
     [PluginService] internal static IMarketBoard MarketBoard { get; private set; } = null!;
     [PluginService] internal static IDataManager Data { get; private set; } = null!;
+    [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     public Configuration Config { get; }
     internal MarketPrices Prices { get; }
     internal NativeReader Reader { get; }
@@ -27,6 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     private readonly Highlighter highlighter;
     private readonly WindowSystem windows = new("UndercutKing");
     private readonly MainWindow main;
+    private readonly DtrCounter dtrCounter;
     private DateTimeOffset nextTick;
     private DateTimeOffset nextSave;
     private ulong characterId;
@@ -41,6 +43,7 @@ public sealed class Plugin : IDalamudPlugin
         Reader = new(Prices);
         highlighter = new(this);
         main = new(this);
+        dtrCounter = new(this, Open);
         windows.AddWindow(main);
         Commands.AddHandler("/undercutking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王设置与价格状态。" });
         Commands.AddHandler("/uking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王。" });
@@ -80,7 +83,7 @@ public sealed class Plugin : IDalamudPlugin
                 Active = null;
                 characterId = id;
             }
-            if (id == 0) { Active = null; return; }
+            if (id == 0) { Active = null; dtrCounter.Update(); return; }
             var owners = Reader.Owners();
             Prices.SetOwners(owners.Select(x => x.Id).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.RetainerId)),
                 owners.Select(x => x.Name).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.Name)));
@@ -105,6 +108,7 @@ public sealed class Plugin : IDalamudPlugin
                 Save();
                 nextSave = DateTimeOffset.UtcNow.AddSeconds(5);
             }
+            dtrCounter.Update();
         }
         catch (Exception ex)
         {
@@ -119,6 +123,7 @@ public sealed class Plugin : IDalamudPlugin
         disposed = true;
         Framework.Update -= Tick;
         MarketBoard.OfferingsReceived -= Receive;
+        dtrCounter.Dispose();
         highlighter.Dispose();
         Reader.Dispose();
         Prices.Dispose();
