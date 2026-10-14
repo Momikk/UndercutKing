@@ -13,12 +13,16 @@ Check("initial undercut", PriceRules.Evaluate(listed, market, now, 15), Highligh
 Check("lowering price clears highlight", PriceRules.Evaluate(listed with { Price = 899 }, market, now, 15), HighlightStatus.Normal);
 Check("equal price is competitive", PriceRules.Evaluate(listed with { Price = 900 }, market, now, 15), HighlightStatus.Normal);
 Check("fresh market rise clears highlight", PriceRules.Evaluate(listed, market with { Nq = 1100 }, now, 15), HighlightStatus.Normal);
-Check("HQ does not compare with cheap NQ", PriceRules.Evaluate(listed with { Hq = true }, market, now, 15), HighlightStatus.Normal);
+Check("HQ compares with cheaper NQ", PriceRules.Evaluate(listed with { Hq = true }, market, now, 15), HighlightStatus.Undercut);
+Check("NQ compares with cheaper HQ", PriceRules.Evaluate(listed, market with { Nq = 1500, Hq = 900 }, now, 15), HighlightStatus.Undercut);
+Check("single quality quote serves both qualities", PriceRules.Evaluate(listed, market with { Nq = null, Hq = 900 }, now, 15), HighlightStatus.Undercut);
 Check("expired data is unknown", PriceRules.Evaluate(listed, market with { ObservedAt = now.AddMinutes(-16) }, now, 15), HighlightStatus.Unknown);
 Check("no data is unknown", PriceRules.Evaluate(listed, null, now, 15), HighlightStatus.Unknown);
 Check("not-yet-loaded price is unknown", PriceRules.Evaluate(listed with { Price = 0 }, market, now, 15), HighlightStatus.Unknown);
-Check("complete empty market is competitive", PriceRules.Evaluate(listed, market with { Nq = null }, now, 15), HighlightStatus.Normal);
-Check("partial market cannot prove absent quality", PriceRules.Evaluate(listed, market with { Nq = null, Complete = false }, now, 15), HighlightStatus.Unknown);
+Check("complete empty market is competitive", PriceRules.Evaluate(listed, market with { Nq = null, Hq = null }, now, 15), HighlightStatus.Normal);
+Check("partial empty market is unknown", PriceRules.Evaluate(listed, market with { Nq = null, Hq = null, Complete = false }, now, 15), HighlightStatus.Unknown);
+Check("47-hour quote remains valid with two-day setting", PriceRules.Evaluate(listed, market with { ObservedAt = now.AddHours(-47) }, now, 2880), HighlightStatus.Undercut);
+Check("49-hour quote expires with two-day setting", PriceRules.Evaluate(listed, market with { ObservedAt = now.AddHours(-49) }, now, 2880), HighlightStatus.Unknown);
 var snapshots = new List<RetainerSnapshot>
 {
     new() { CharacterId = 1, RetainerId = 10, Listings = [listed, listed with { Slot = 1 }] },

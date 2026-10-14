@@ -13,16 +13,19 @@ public sealed class RetainerSnapshot
     public List<Listing> Listings { get; set; } = [];
 }
 
-public sealed record MarketQuote(uint? Nq, uint? Hq, DateTimeOffset ObservedAt, string Source, bool Complete = true);
+public sealed record MarketQuote(uint? Nq, uint? Hq, DateTimeOffset ObservedAt, string Source, bool Complete = true)
+{
+    public uint? Lowest => Nq is { } nq && Hq is { } hq ? Math.Min(nq, hq) : Nq ?? Hq;
+}
 
 public static class PriceRules
 {
-    // Only compare the same quality. Equal prices are competitive; never invent a price for missing data.
+    // NQ and HQ share one minimum for the same item. Equal prices are competitive.
     public static HighlightStatus Evaluate(Listing listing, MarketQuote? quote, DateTimeOffset now, int minutes)
     {
         if (listing.Price == 0 || quote == null || now - quote.ObservedAt > TimeSpan.FromMinutes(minutes))
             return HighlightStatus.Unknown;
-        var lowest = listing.Hq ? quote.Hq : quote.Nq;
+        var lowest = quote.Lowest;
         if (lowest == null) return quote.Complete ? HighlightStatus.Normal : HighlightStatus.Unknown;
         return listing.Price > lowest ? HighlightStatus.Undercut : HighlightStatus.Normal;
     }

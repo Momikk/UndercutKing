@@ -38,7 +38,13 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         Config = Interface.GetPluginConfig() as Configuration ?? new();
-        Config.FreshMinutes = Math.Clamp(Config.FreshMinutes, 1, 120);
+        if (Config.Version < 2)
+        {
+            Config.FreshMinutes = 2 * 24 * 60;
+            Config.Version = 2;
+            Interface.SavePluginConfig(Config);
+        }
+        Config.FreshMinutes = Math.Clamp(Config.FreshMinutes, 1, 30 * 24 * 60);
         Prices = new();
         Reader = new(Prices);
         highlighter = new(this);
