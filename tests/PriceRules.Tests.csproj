@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../UndercutKing/Models.cs" Link="Models.cs" />
+    <Compile Include="../UndercutKing/HighlightAppearance.cs" Link="HighlightAppearance.cs" />
   </ItemGroup>
 </Project>

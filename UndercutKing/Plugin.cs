@@ -45,6 +45,7 @@ public sealed class Plugin : IDalamudPlugin
             Interface.SavePluginConfig(Config);
         }
         Config.FreshMinutes = Math.Clamp(Config.FreshMinutes, 1, 30 * 24 * 60);
+        if (!Enum.IsDefined(Config.HighlightTheme)) Config.HighlightTheme = HighlightTheme.Auto;
         Prices = new();
         Reader = new(Prices);
         highlighter = new(this);

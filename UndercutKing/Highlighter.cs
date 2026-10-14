@@ -11,7 +11,7 @@ namespace UndercutKing;
 
 internal sealed unsafe class Highlighter : IDisposable
 {
-    private sealed record NodeState(string Identity, byte[] Original, ByteColor Color, byte[] Applied);
+    private sealed record NodeState(string Identity, byte[] Original, TextAppearance Appearance, byte[] Applied, TextAppearance AppliedAppearance);
     private readonly Dictionary<nint, NodeState> saleNodes = [];
     private readonly Dictionary<nint, NodeState> retainerNodes = [];
     private readonly Plugin plugin;
@@ -27,28 +27,39 @@ internal sealed unsafe class Highlighter : IDisposable
     }
 
     private static byte[] TextBytes(AtkTextNode* node) => MemoryHelper.ReadRawNullTerminated((nint)(byte*)node->NodeText.StringPtr).Append((byte)0).ToArray();
-    private static bool SameColor(ByteColor a, ByteColor b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
-    private static ByteColor Color(HighlightStatus status) => status == HighlightStatus.Undercut
-        ? new() { R = 255, G = 85, B = 85, A = 255 }
-        : new() { R = 255, G = 210, B = 75, A = 255 };
+    private static TextColor ReadColor(ByteColor color) => new(color.R, color.G, color.B, color.A);
+    private static ByteColor WriteColor(TextColor color) => new() { R = color.R, G = color.G, B = color.B, A = color.A };
+    private static TextAppearance ReadAppearance(AtkTextNode* node) => new(ReadColor(node->TextColor), ReadColor(node->EdgeColor), (ushort)node->TextFlags);
+    private static void WriteAppearance(AtkTextNode* node, TextAppearance appearance)
+    {
+        node->TextColor = WriteColor(appearance.Fill);
+        node->EdgeColor = WriteColor(appearance.Edge);
+        node->TextFlags = (TextFlags)appearance.Flags;
+    }
 
-    private static void Apply(AtkTextNode* node, string identity, HighlightStatus status, Dictionary<nint, NodeState> states)
+    private static void Apply(AtkTextNode* node, string identity, HighlightStatus status, Dictionary<nint, NodeState> states, HighlightTheme theme = HighlightTheme.Auto)
     {
         var key = (nint)node;
         var current = TextBytes(node);
         if (states.TryGetValue(key, out var old))
         {
             // The game may rebuild/recycle this renderer. Only restore text that is still ours.
-            if (!current.SequenceEqual(old.Applied))
+            if (!current.SequenceEqual(old.Applied) || ReadAppearance(node).Fill != old.AppliedAppearance.Fill)
             {
-                if (SameColor(node->TextColor, Color(HighlightStatus.Undercut)) || SameColor(node->TextColor, Color(HighlightStatus.Unknown)))
-                    node->TextColor = old.Color;
+                // If the game switched theme but the plain text is still ours, restore its markup
+                // while preserving the game's newly assigned fill color.
+                if (current.SequenceEqual(old.Applied))
+                {
+                    node->SetText(old.Original.AsSpan());
+                    current = old.Original;
+                }
+                WriteAppearance(node, HighlightAppearance.Restore(old.Appearance, ReadAppearance(node), old.AppliedAppearance));
                 states.Remove(key);
             }
             else if (old.Identity != identity || status == HighlightStatus.Normal)
             {
                 node->SetText(old.Original.AsSpan());
-                node->TextColor = old.Color;
+                WriteAppearance(node, HighlightAppearance.Restore(old.Appearance, ReadAppearance(node), old.AppliedAppearance));
                 states.Remove(key);
                 current = old.Original;
             }
@@ -58,13 +69,20 @@ internal sealed unsafe class Highlighter : IDisposable
         {
             var text = node->NodeText.StringPtr.AsDalamudSeString().TextValue;
             var original = current;
-            var originalColor = node->TextColor;
+            var originalAppearance = ReadAppearance(node);
             node->SetText(text); // strip in-text color payloads so the requested color is visible
-            state = new(identity, original, originalColor, TextBytes(node));
+            state = new(identity, original, originalAppearance, TextBytes(node), originalAppearance);
             states[key] = state;
         }
-        var desired = Color(status);
-        if (!SameColor(node->TextColor, desired)) node->TextColor = desired;
+        var currentAppearance = ReadAppearance(node);
+        if ((currentAppearance.Flags & ~HighlightAppearance.EdgeFlag) != (state.AppliedAppearance.Flags & ~HighlightAppearance.EdgeFlag))
+            state = state with { Appearance = state.Appearance with
+            {
+                Flags = (ushort)((currentAppearance.Flags & ~HighlightAppearance.EdgeFlag) | (state.Appearance.Flags & HighlightAppearance.EdgeFlag)),
+            } };
+        var desired = HighlightAppearance.Apply(status, state.Appearance, theme);
+        if (ReadAppearance(node) != desired) WriteAppearance(node, desired);
+        states[key] = state with { AppliedAppearance = desired };
     }
 
     private void DrawSales(AddonEvent _, AddonArgs args)
@@ -84,7 +102,7 @@ internal sealed unsafe class Highlighter : IDisposable
             var listing = snapshot != null && snapshot.RetainerId == current
                 ? snapshot.Listings.FirstOrDefault(x => x.MenuIndex == row->ListItemIndex) : null;
             var status = !restoreOnly && plugin.Config.ItemHighlight && listing != null ? plugin.Status(snapshot!, listing) : HighlightStatus.Normal;
-            Apply(node, $"{current}:{listing?.Slot}:{listing?.ItemId}:{listing?.Hq}", status, saleNodes);
+            Apply(node, $"{current}:{listing?.Slot}:{listing?.ItemId}:{listing?.Hq}", status, saleNodes, plugin.Config.HighlightTheme);
         }
     }
 
@@ -110,7 +128,7 @@ internal sealed unsafe class Highlighter : IDisposable
                 status = results == null ? HighlightStatus.Unknown : results.Contains(HighlightStatus.Undercut)
                     ? HighlightStatus.Undercut : results.Contains(HighlightStatus.Unknown) ? HighlightStatus.Unknown : HighlightStatus.Normal;
             }
-            Apply(node, id.ToString(), status, retainerNodes);
+            Apply(node, id.ToString(), status, retainerNodes, plugin.Config.HighlightTheme);
         }
     }
 

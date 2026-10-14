@@ -37,3 +37,30 @@ if (UndercutSummary.Count(snapshots, 1, (_, _) => HighlightStatus.Unknown).BarTe
 if (new UndercutSummary(2, 1, 1).BarText != "压价 2+") throw new Exception("Partial counts must be marked");
 if (UndercutSummary.Count(snapshots, 0, Evaluate).Undercut != 0) throw new Exception("Logged-out state leaked another character count");
 Console.WriteLine($"PASS: {checks} pricing and 5 DTR regression scenarios");
+var appearanceChecks = 0;
+void AppearanceCheck(string scenario, bool passes)
+{
+    appearanceChecks++;
+    if (!passes) throw new Exception(scenario);
+}
+var lightOriginal = new TextAppearance(new(50, 50, 50, 210), new(230, 230, 230, 180), 2);
+var darkOriginal = new TextAppearance(new(220, 220, 220), new(30, 30, 30), 0);
+foreach (var status in new[] { HighlightStatus.Undercut, HighlightStatus.Unknown })
+{
+    var lightStyle = HighlightAppearance.Apply(status, lightOriginal, HighlightTheme.Light);
+    var darkStyle = HighlightAppearance.Apply(status, darkOriginal, HighlightTheme.Dark);
+    foreach (var background in new[] { new TextColor(170, 170, 170), new TextColor(190, 190, 190) })
+        AppearanceCheck("light theme contrast", lightStyle.Fill.Contrast(background) >= 4.5);
+    foreach (var background in new[] { new TextColor(32, 32, 32), new TextColor(50, 50, 50) })
+        AppearanceCheck("dark theme contrast", darkStyle.Fill.Contrast(background) >= 4.5);
+    AppearanceCheck("auto light palette", HighlightAppearance.Apply(status, lightOriginal, HighlightTheme.Auto) == lightStyle);
+    AppearanceCheck("auto dark palette", HighlightAppearance.Apply(status, darkOriginal, HighlightTheme.Auto) == darkStyle);
+    AppearanceCheck("outline enabled without changing other flags", lightStyle.Flags == (lightOriginal.Flags | HighlightAppearance.EdgeFlag));
+    AppearanceCheck("all original fields restored", HighlightAppearance.Restore(lightOriginal, lightStyle, lightStyle) == lightOriginal);
+    var external = lightStyle with { Fill = new TextColor(10, 90, 120), Edge = new TextColor(60, 70, 80), Flags = (ushort)(lightStyle.Flags | 1) };
+    var restored = HighlightAppearance.Restore(lightOriginal, external, lightStyle);
+    AppearanceCheck("external recoloring preserved", restored.Fill == external.Fill && restored.Edge == external.Edge);
+    AppearanceCheck("restore only our outline bit", restored.Flags == (lightOriginal.Flags | 1));
+}
+AppearanceCheck("normal appearance not changed", HighlightAppearance.Apply(HighlightStatus.Normal, lightOriginal, HighlightTheme.Dark) == lightOriginal);
+Console.WriteLine($"PASS: {appearanceChecks} theme contrast and appearance restoration scenarios");

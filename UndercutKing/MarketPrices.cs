@@ -24,7 +24,7 @@ internal sealed class MarketPrices : IDisposable
     private HashSet<string> ownedNames = [];
     public string LastError { get; private set; } = "";
 
-    public MarketPrices() => http.DefaultRequestHeaders.UserAgent.ParseAdd("UndercutKing/0.1.0.2 (+https://github.com/Momikk/UndercutKing)");
+    public MarketPrices() => http.DefaultRequestHeaders.UserAgent.ParseAdd("UndercutKing/0.1.0.3 (+https://github.com/Momikk/UndercutKing)");
     public MarketQuote? Get(uint world, uint item) => quotes.GetValueOrDefault((world, item));
 
     public void SetOwners(IEnumerable<ulong> ids, IEnumerable<string> names)

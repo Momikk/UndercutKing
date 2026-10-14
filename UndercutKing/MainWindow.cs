@@ -19,6 +19,13 @@ internal sealed class MainWindow : Window
     {
         ImGui.TextWrapped("红色：售价高于同物品的市场最低价，不区分 NQ/HQ；黄色：市场数据未知或已过期。改价后自动重新读取售价。仅提示，不自动改价。");
         var config = plugin.Config;
+        var theme = (int)config.HighlightTheme;
+        string[] themes = ["自动识别", "浅色界面", "深色界面"];
+        if (ImGui.Combo("高亮配色", ref theme, themes, themes.Length))
+        {
+            config.HighlightTheme = (HighlightTheme)theme;
+            plugin.Save();
+        }
         var showCount = config.ShowDtrCount;
         if (ImGui.Checkbox("服务器信息栏显示压价数量", ref showCount)) { config.ShowDtrCount = showCount; plugin.Save(); }
         var item = config.ItemHighlight;
