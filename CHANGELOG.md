@@ -4,6 +4,11 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.5 — 2026-10-14
+
+- Hide `(0)` in the retainer list when valid quotes confirm no undercut listings, restoring the native sale quantity text.
+- Keep positive counts and `(N+)` or `(?)` indicators for incomplete prices.
+
 ## 0.1.0.4 — 2026-10-14
 
 - Append each retainer's undercut listing-slot count after the native sale quantity in the retainer list, e.g. “出售中（14件） (3)”.

@@ -35,7 +35,7 @@ public sealed record UndercutSummary(int Undercut, int Unknown, int ScannedRetai
 {
     public string RetainerSuffix => Unknown > 0 || ScannedRetainers == 0
         ? Undercut > 0 ? $" ({Undercut}+)" : " (?)"
-        : $" ({Undercut})";
+        : Undercut > 0 ? $" ({Undercut})" : "";
 
     public string BarText => Unknown > 0 || ScannedRetainers == 0
         ? Undercut > 0 ? $"压价 {Undercut}+" : "压价 ?"
