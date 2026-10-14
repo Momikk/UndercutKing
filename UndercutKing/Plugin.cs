@@ -25,6 +25,7 @@ public sealed class Plugin : IDalamudPlugin
     internal MarketPrices Prices { get; }
     internal NativeReader Reader { get; }
     internal RetainerSnapshot? Active { get; private set; }
+    internal IReadOnlySet<uint> BagItems { get; private set; } = new HashSet<uint>();
     private readonly Highlighter highlighter;
     private readonly WindowSystem windows = new("UndercutKing");
     private readonly MainWindow main;
@@ -95,6 +96,7 @@ public sealed class Plugin : IDalamudPlugin
                 highlighter.Restore();
                 Reader.Reset();
                 Active = null;
+                BagItems = new HashSet<uint>();
                 characterId = id;
             }
             if (id == 0) { Active = null; Prices.Watch([], false); dtrCounter.Update(); return; }
@@ -103,6 +105,7 @@ public sealed class Plugin : IDalamudPlugin
                 owners.Select(x => x.Name).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.Name)));
             var captured = Reader.Capture(id);
             Active = captured; // no use of a previous retainer's snapshot while loading
+            BagItems = captured != null && Config.BagMatchHighlight ? Reader.BagItems() ?? new HashSet<uint>() : new HashSet<uint>();
             if (captured != null)
             {
                 var old = Config.Retainers.FirstOrDefault(x => x.CharacterId == id && x.RetainerId == captured.RetainerId);
@@ -129,6 +132,7 @@ public sealed class Plugin : IDalamudPlugin
         catch (Exception ex)
         {
             Active = null;
+            BagItems = new HashSet<uint>();
             nextTick = DateTimeOffset.UtcNow.AddSeconds(10);
             Log.Error(ex, "UndercutKing snapshot update failed");
         }

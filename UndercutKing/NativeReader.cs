@@ -103,6 +103,25 @@ internal sealed unsafe class NativeReader : IDisposable
         return owners;
     }
 
+    public HashSet<uint>? BagItems()
+    {
+        var manager = InventoryManager.Instance();
+        if (manager == null || Plugin.Objects.LocalPlayer == null) return null;
+        var slots = new List<(uint ItemId, uint Quantity)>();
+        foreach (var type in new[] { InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4 })
+        {
+            var container = manager->GetInventoryContainer(type);
+            // Require all four normal bags to be loaded; never reuse another character's bag snapshot.
+            if (container == null || !container->IsLoaded || container->Items == null || container->Size is < 1 or > 140) return null;
+            for (var slot = 0; slot < container->Size; slot++)
+            {
+                var item = container->Items[slot];
+                if (item.ItemId != 0 && item.Quantity > 0) slots.Add((item.ItemId, (uint)item.Quantity));
+            }
+        }
+        return BagMatchRules.ItemIds(slots);
+    }
+
     public RetainerSnapshot? Capture(ulong characterId)
     {
         var id = ActiveRetainer();

@@ -104,7 +104,9 @@ internal sealed unsafe class Highlighter : IDisposable
             if (node == null) continue;
             var listing = snapshot != null && snapshot.RetainerId == current
                 ? snapshot.Listings.FirstOrDefault(x => x.MenuIndex == row->ListItemIndex) : null;
-            var status = !restoreOnly && plugin.Config.ItemHighlight && listing != null ? plugin.Status(snapshot!, listing) : HighlightStatus.Normal;
+            var status = restoreOnly ? HighlightStatus.Normal : BagMatchRules.Display(listing,
+                listing != null ? plugin.Status(snapshot!, listing) : HighlightStatus.Normal,
+                plugin.BagItems, plugin.Config.ItemHighlight, plugin.Config.BagMatchHighlight);
             Apply(node, $"{current}:{listing?.Slot}:{listing?.ItemId}:{listing?.Hq}", status, saleNodes, plugin.Config.HighlightTheme);
         }
     }

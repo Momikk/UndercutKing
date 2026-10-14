@@ -1,6 +1,6 @@
 namespace UndercutKing;
 
-public enum HighlightStatus { Normal, Undercut, Unknown }
+public enum HighlightStatus { Normal, Undercut, Unknown, BagMatch }
 
 public sealed record Listing(int Slot, int MenuIndex, uint ItemId, bool Hq, uint Quantity, uint Price);
 public sealed class RetainerSnapshot

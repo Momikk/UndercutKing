@@ -38,7 +38,7 @@ internal sealed class UniversalisClient : IDisposable
     {
         this.getQuote = getQuote; this.putQuote = putQuote;
         this.http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        this.http.DefaultRequestHeaders.UserAgent.ParseAdd("UndercutKing/0.1.0.7 (+https://github.com/Momikk/UndercutKing)");
+        this.http.DefaultRequestHeaders.UserAgent.ParseAdd($"UndercutKing/{typeof(UniversalisClient).Assembly.GetName().Version} (+https://github.com/Momikk/UndercutKing)");
         worker = Task.Run(RunRequests);
         feed = startFeed ? Task.Run(RunFeed) : Task.CompletedTask;
     }
@@ -148,7 +148,7 @@ internal sealed class UniversalisClient : IDisposable
                 using var client = new ClientWebSocket();
                 client.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
                 client.Options.KeepAliveTimeout = TimeSpan.FromSeconds(30);
-                client.Options.SetRequestHeader("User-Agent", "UndercutKing/0.1.0.7");
+                client.Options.SetRequestHeader("User-Agent", $"UndercutKing/{typeof(UniversalisClient).Assembly.GetName().Version}");
                 lock (gate) socket = client;
                 try
                 {

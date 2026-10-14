@@ -1,0 +1,29 @@
+{
+  "Author": "Momikk",
+  "Name": "压价之王 UndercutKing",
+  "InternalName": "UndercutKing",
+  "AssemblyVersion": "0.1.0.8",
+  "Description": "轻量雇员市场辅助：比对市场价格，在雇员销售列表与雇员列表中高亮被压价的物品。仅提供提示，不自动改价。由 Momikk 维护，部分库存与界面交互代码改编自 Critical_Impact 的 Allagan Market，采用 AGPL-3.0-or-later。",
+  "ApplicableVersion": "any",
+  "RepoUrl": "https://github.com/Momikk/UndercutKing",
+  "Tags": [
+    "market",
+    "retainer",
+    "undercut"
+  ],
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "IconUrl": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png",
+  "Punchline": "高亮被压价的雇员物品，改价后及时更新。",
+  "Changelog": "0.1.0.8 更新说明 / Changelog\n中文：\n- 雇员出售列表中的物品若也存在于普通背包四栏，名称标蓝；HQ/NQ 视为同一物品。\n- 新增独立开关，背包变化后更新颜色；蓝色优先于红黄名称颜色，压价数量与价格状态不变。\n- 背包匹配仅读取本地库存，不增加 Universalis 请求。\nEnglish:\n- Highlight listed item names in blue when the same item is present in the four normal inventory bags, treating HQ and NQ as identical.\n- Add an independent toggle and update colors after bag changes. Blue takes visual priority over red/yellow names without changing undercut counts or price status.\n- Match bags locally without additional Universalis requests.\n完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md",
+  "AcceptsFeedback": true,
+  "DownloadLinkInstall": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/dist/UndercutKing-0.1.0.8.zip",
+  "DownloadLinkUpdate": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/dist/UndercutKing-0.1.0.8.zip",
+  "DownloadCount": 0,
+  "IsHide": false,
+  "IsTestingExclusive": false,
+  "LastUpdate": 1791970602
+}

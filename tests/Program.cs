@@ -47,7 +47,7 @@ void AppearanceCheck(string scenario, bool passes)
 }
 var lightOriginal = new TextAppearance(new(50, 50, 50, 210), new(230, 230, 230, 180), 2);
 var darkOriginal = new TextAppearance(new(220, 220, 220), new(30, 30, 30), 0);
-foreach (var status in new[] { HighlightStatus.Undercut, HighlightStatus.Unknown })
+foreach (var status in new[] { HighlightStatus.Undercut, HighlightStatus.Unknown, HighlightStatus.BagMatch })
 {
     var lightStyle = HighlightAppearance.Apply(status, lightOriginal, HighlightTheme.Light);
     var darkStyle = HighlightAppearance.Apply(status, darkOriginal, HighlightTheme.Dark);
@@ -124,3 +124,21 @@ RefreshCheck("invalid interval cannot hammer the API", !MarketRefreshRules.Shoul
 RefreshCheck("older uploads never become fresh by fetching them", PriceRules.Evaluate(listed, market with { ObservedAt = now.AddDays(-3) }, now, 2880) == HighlightStatus.Unknown);
 Console.WriteLine($"PASS: {refreshChecks} background refresh scheduling regression scenarios");
 await TransportRegression.RunAsync();
+var bagChecks = 0;
+void BagCheck(string scenario, bool ok) { bagChecks++; if (!ok) throw new Exception(scenario); }
+var bagItems = BagMatchRules.ItemIds([(100u, 1u), (100u, 99u), (101u, 0u), (0u, 1u)]);
+BagCheck("positive nonempty bag slots only, duplicates merged", bagItems.SetEquals([100u]));
+BagCheck("NQ listing matches bag base ID", BagMatchRules.Display(listed, HighlightStatus.Normal, bagItems, true, true) == HighlightStatus.BagMatch);
+BagCheck("HQ listing matches same bag base ID", BagMatchRules.Display(listed with { Hq = true }, HighlightStatus.Normal, bagItems, true, true) == HighlightStatus.BagMatch);
+BagCheck("blue overrides red visually", BagMatchRules.Display(listed, HighlightStatus.Undercut, bagItems, true, true) == HighlightStatus.BagMatch);
+BagCheck("blue overrides unknown visually", BagMatchRules.Display(listed, HighlightStatus.Unknown, bagItems, true, true) == HighlightStatus.BagMatch);
+BagCheck("unrelated item keeps price highlight", BagMatchRules.Display(listed with { ItemId = 102 }, HighlightStatus.Undercut, bagItems, true, true) == HighlightStatus.Undercut);
+BagCheck("removing bag item restores price status", BagMatchRules.Display(listed, HighlightStatus.Undercut, new HashSet<uint>(), true, true) == HighlightStatus.Undercut);
+BagCheck("turning blue off restores price status", BagMatchRules.Display(listed, HighlightStatus.Unknown, bagItems, true, false) == HighlightStatus.Unknown);
+BagCheck("blue works independently of price highlight toggle", BagMatchRules.Display(listed, HighlightStatus.Undercut, bagItems, false, true) == HighlightStatus.BagMatch);
+BagCheck("all highlighting disabled returns normal", BagMatchRules.Display(listed, HighlightStatus.Undercut, bagItems, false, false) == HighlightStatus.Normal);
+BagCheck("missing snapshot cannot mark another retainer", BagMatchRules.Display(null, HighlightStatus.Undercut, bagItems, true, true) == HighlightStatus.Normal);
+BagCheck("empty or unavailable bag has no blue match", BagMatchRules.Display(listed, HighlightStatus.Normal, new HashSet<uint>(), true, true) == HighlightStatus.Normal);
+BagCheck("price evaluation remains undercut for blue item", PriceRules.Evaluate(listed, market, now, 2880) == HighlightStatus.Undercut);
+BagCheck("price counter remains independent of blue", UndercutSummary.Count([new() { CharacterId = 1, RetainerId = 10, Listings = [listed] }], 1, Evaluate).Undercut == 1);
+Console.WriteLine($"PASS: {bagChecks} bag matching and color precedence regression scenarios");

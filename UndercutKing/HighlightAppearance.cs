@@ -30,8 +30,10 @@ public static class HighlightAppearance
         if (status == HighlightStatus.Normal) return original;
         var light = theme == HighlightTheme.Light || theme == HighlightTheme.Auto && original.Fill.Luminance < .35;
         var fill = light
-            ? status == HighlightStatus.Undercut ? new TextColor(120, 20, 20) : new TextColor(90, 55, 0)
-            : status == HighlightStatus.Undercut ? new TextColor(255, 120, 120) : new TextColor(255, 209, 102);
+            ? status == HighlightStatus.BagMatch ? new TextColor(0, 55, 125)
+                : status == HighlightStatus.Undercut ? new TextColor(120, 20, 20) : new TextColor(90, 55, 0)
+            : status == HighlightStatus.BagMatch ? new TextColor(100, 180, 255)
+                : status == HighlightStatus.Undercut ? new TextColor(255, 120, 120) : new TextColor(255, 209, 102);
         var edge = light ? new TextColor(245, 245, 245) : new TextColor(16, 16, 16);
         return new(fill, edge, (ushort)(original.Flags | EdgeFlag));
     }

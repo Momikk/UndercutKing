@@ -6,6 +6,7 @@ public sealed class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 3;
     public bool ItemHighlight { get; set; } = true;
+    public bool BagMatchHighlight { get; set; } = true;
     public bool RetainerHighlight { get; set; } = true;
     public bool ShowDtrCount { get; set; } = true;
     public bool ShowRetainerCount { get; set; } = true;

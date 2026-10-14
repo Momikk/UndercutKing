@@ -33,6 +33,9 @@ internal sealed class MainWindow : Window
         ImGui.TextWrapped("雇员市场栏括号内为被压价的上架位数量；(N+) 表示还有价格待确认的商品，(?) 表示数量尚未确认。");
         var item = config.ItemHighlight;
         if (ImGui.Checkbox("高亮雇员销售物品", ref item)) { config.ItemHighlight = item; plugin.Save(); }
+        var bagMatch = config.BagMatchHighlight;
+        if (ImGui.Checkbox("背包同物品标蓝（不区分 NQ/HQ）", ref bagMatch)) { config.BagMatchHighlight = bagMatch; plugin.Save(); }
+        ImGui.TextWrapped("蓝色：普通背包四栏中有同物品，优先于红黄文字颜色；压价数量和下方价格状态仍按市场报价判断。不包含兵装库、陆行鸟鞍囊和雇员背包。");
         var retainers = config.RetainerHighlight;
         if (ImGui.Checkbox("高亮雇员列表", ref retainers)) { config.RetainerHighlight = retainers; plugin.Save(); }
         var automatic = config.AutomaticPriceCheck;

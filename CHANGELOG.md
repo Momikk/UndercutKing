@@ -4,6 +4,13 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.8 — 2026-10-14
+
+- Highlight listed item names in blue when the same item exists in the four normal inventory bags. Treat NQ and HQ as identical; exclude the Armoury Chest, saddlebags and retainer inventories.
+- Add an independent toggle enabled by default and check bag changes approximately every 0.25 seconds. Restore market highlighting or original styles when the match disappears or the feature is disabled.
+- Give blue visual priority over red/yellow sale-list names while retaining the market-based undercut judgment, information-bar counts and price table.
+- Add light/dark blue palettes and outlines. Read local inventory only, without additional Universalis requests.
+
 ## 0.1.0.7 — 2026-10-14
 
 - Subscribe to Universalis listing additions/removals and coalesce full-price checks only for scanned items of the current character. Do not treat deltas as complete market minima.
