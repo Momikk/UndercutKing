@@ -45,6 +45,12 @@ public sealed class Plugin : IDalamudPlugin
             Interface.SavePluginConfig(Config);
         }
         Config.FreshMinutes = Math.Clamp(Config.FreshMinutes, 1, 30 * 24 * 60);
+        if (Config.Version < 3)
+        {
+            if (Config.AutomaticRefreshMinutes == 5) Config.AutomaticRefreshMinutes = 15;
+            Config.Version = 3;
+            Interface.SavePluginConfig(Config);
+        }
         Config.AutomaticRefreshMinutes = Math.Clamp(Config.AutomaticRefreshMinutes, 1, 60);
         if (!Enum.IsDefined(Config.HighlightTheme)) Config.HighlightTheme = HighlightTheme.Auto;
         Prices = new();
@@ -91,7 +97,7 @@ public sealed class Plugin : IDalamudPlugin
                 Active = null;
                 characterId = id;
             }
-            if (id == 0) { Active = null; dtrCounter.Update(); return; }
+            if (id == 0) { Active = null; Prices.Watch([], false); dtrCounter.Update(); return; }
             var owners = Reader.Owners();
             Prices.SetOwners(owners.Select(x => x.Id).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.RetainerId)),
                 owners.Select(x => x.Name).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.Name)));
@@ -107,10 +113,12 @@ public sealed class Plugin : IDalamudPlugin
                     dirty = true;
                 }
             }
+            Prices.Watch(Config.Retainers.Where(x => x.CharacterId == id)
+                .SelectMany(x => x.Listings.Select(item => (x.WorldId, item.ItemId))), Config.AutomaticPriceCheck && Config.UseMarketPush, Config.AutomaticPriceCheck);
             if (Config.AutomaticPriceCheck)
                 foreach (var snapshot in Config.Retainers.Where(x => x.CharacterId == id))
                     foreach (var item in snapshot.Listings.Select(x => x.ItemId).Distinct())
-                        Prices.Queue(snapshot.WorldId, item, false, Config.AutomaticRefreshMinutes);
+                        Prices.Queue(snapshot.WorldId, item, false, Prices.PushConnected ? Config.AutomaticRefreshMinutes : Math.Min(5, Config.AutomaticRefreshMinutes));
             if (dirty && DateTimeOffset.UtcNow >= nextSave)
             {
                 Save();

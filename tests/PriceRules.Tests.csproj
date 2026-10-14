@@ -10,5 +10,9 @@
     <Compile Include="../UndercutKing/HighlightAppearance.cs" Link="HighlightAppearance.cs" />
     <Compile Include="../UndercutKing/HighlightText.cs" Link="HighlightText.cs" />
     <Compile Include="../UndercutKing/MarketRefreshRules.cs" Link="MarketRefreshRules.cs" />
+    <Compile Include="../UndercutKing/MarketRequestQueue.cs" Link="MarketRequestQueue.cs" />
+    <Compile Include="../UndercutKing/UniversalisProtocol.cs" Link="UniversalisProtocol.cs" />
+    <Compile Include="../UndercutKing/UniversalisClient.cs" Link="UniversalisClient.cs" />
+    <PackageReference Include="MongoDB.Bson" Version="3.5.2" />
   </ItemGroup>
 </Project>

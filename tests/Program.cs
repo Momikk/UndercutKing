@@ -1,5 +1,7 @@
 using UndercutKing;
 
+if (args.Contains("--probe")) { await TransportRegression.ProbeAsync(); return; }
+
 var now = DateTimeOffset.UtcNow;
 var listed = new Listing(0, 0, 100, false, 1, 1000);
 var market = new MarketQuote(900, 1500, now, "test");
@@ -121,3 +123,4 @@ RefreshCheck("longer configured interval takes effect", !MarketRefreshRules.Shou
 RefreshCheck("invalid interval cannot hammer the API", !MarketRefreshRules.ShouldRequest(now, now.AddSeconds(-30), null, false, 0));
 RefreshCheck("older uploads never become fresh by fetching them", PriceRules.Evaluate(listed, market with { ObservedAt = now.AddDays(-3) }, now, 2880) == HighlightStatus.Unknown);
 Console.WriteLine($"PASS: {refreshChecks} background refresh scheduling regression scenarios");
+await TransportRegression.RunAsync();

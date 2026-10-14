@@ -1,0 +1,29 @@
+{
+  "Author": "Momikk",
+  "Name": "压价之王 UndercutKing",
+  "InternalName": "UndercutKing",
+  "AssemblyVersion": "0.1.0.7",
+  "Description": "轻量雇员市场辅助：比对市场价格，在雇员销售列表与雇员列表中高亮被压价的物品。仅提供提示，不自动改价。由 Momikk 维护，部分库存与界面交互代码改编自 Critical_Impact 的 Allagan Market，采用 AGPL-3.0-or-later。",
+  "ApplicableVersion": "any",
+  "RepoUrl": "https://github.com/Momikk/UndercutKing",
+  "Tags": [
+    "market",
+    "retainer",
+    "undercut"
+  ],
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "IconUrl": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png",
+  "Punchline": "高亮被压价的雇员物品，改价后及时更新。",
+  "Changelog": "0.1.0.7 更新说明 / Changelog\n中文：\n- 新增市场变化推送，相关商品变化后合并补查；断线重连并核对遗漏行情。\n- 同服务器最多 50 种物品批量查询，批次间隔至少一秒；限流时全部查询暂停，遵守 Retry-After 并逐步延长等待。\n- 推送正常时默认每 15 分钟核对，不可用时改用不超过 5 分钟的查询；两天报价有效期保持独立。\nEnglish:\n- Add market-change subscriptions with coalesced full-price checks, reconnection and baseline refreshes.\n- Batch up to 50 items per world, pace batches at least one second apart, and pause all queries on rate limits with Retry-After and increasing backoff.\n- Default to 15-minute verification with push connected; fall back to polling at most five minutes apart. Quote validity remains independent.\n完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md",
+  "AcceptsFeedback": true,
+  "DownloadLinkInstall": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/dist/UndercutKing-0.1.0.7.zip",
+  "DownloadLinkUpdate": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/dist/UndercutKing-0.1.0.7.zip",
+  "DownloadCount": 0,
+  "IsHide": false,
+  "IsTestingExclusive": false,
+  "LastUpdate": 1791959743
+}

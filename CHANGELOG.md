@@ -4,6 +4,15 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.7 — 2026-10-14
+
+- Subscribe to Universalis listing additions/removals and coalesce full-price checks only for scanned items of the current character. Do not treat deltas as complete market minima.
+- Refresh the baseline after connection/reconnection, back off connection failures, and stop subscriptions on logout, an empty watch list or automatic-query disable.
+- Batch up to 50 items per world with a five-second coalescing window and one sequential queue paced at least one second apart. Space per-item push checks at least 30 seconds apart.
+- Pause all requests, including manual refreshes, on 429 responses. Wait at least a minute, respect longer Retry-After values, increase backoff, and attempt failed batches at most three times.
+- Default to 15-minute verification when push is connected and polling at most five minutes apart otherwise. Migrate the old five-minute default to 15 while retaining other custom intervals and separate two-day quote validity.
+- Add a push toggle and connection/queue/rate-limit status. Include the BSON protocol dependency and third-party license notice.
+
 ## 0.1.0.6 — 2026-10-14
 
 - Fix quote validity being used as the polling interval. A two-day validity window no longer blocks periodic queries.
