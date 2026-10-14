@@ -9,6 +9,14 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
+    <Changelog>0.1.0.3 更新说明 / Changelog
+中文：
+- 改善红色、黄色高亮的可读性，新增自动、浅色界面和深色界面配色。
+- 为高亮文字添加适合背景的描边；关闭高亮或卸载时恢复原始文字样式。
+English:
+- Improve red and yellow highlight readability with automatic, light and dark theme palettes.
+- Add contrasting text outlines and restore original text styles when highlights are disabled or the plugin is unloaded.
+完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

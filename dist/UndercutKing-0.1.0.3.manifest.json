@@ -24,5 +24,6 @@
   "IsTestingExclusive": false,
   "IsHide": false,
   "DownloadLinkInstall": "https://raw.githubusercontent.com/Momikk/UndercutKing/10863f5af3e2cbb5dbb66c93cb92b88fa3e06245/dist/UndercutKing-0.1.0.3.zip",
-  "LastUpdate": 1791941569
+  "LastUpdate": 1791941569,
+  "Changelog": "0.1.0.3 更新说明 / Changelog\n中文：\n- 改善红色、黄色高亮的可读性，新增自动、浅色界面和深色界面配色。\n- 为高亮文字添加适合背景的描边；关闭高亮或卸载时恢复原始文字样式。\nEnglish:\n- Improve red and yellow highlight readability with automatic, light and dark theme palettes.\n- Add contrasting text outlines and restore original text styles when highlights are disabled or the plugin is unloaded.\n完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md"
 }
