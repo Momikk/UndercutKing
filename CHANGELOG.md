@@ -4,6 +4,12 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.9 — 2026-10-14
+
+- Fix bag-match blue highlighting being limited to item sales instead of also appearing in the retainer overview.
+- Read normal bags while the overview is open. Turn a retainer's market sale text blue when any listing in its latest scanned snapshot for the current character matches a bag item, regardless of NQ/HQ.
+- Preserve undercut-count suffixes and market judgments; restore previous colors when matches disappear or the feature is disabled. Unscanned retainers cannot show a confirmed blue match.
+
 ## 0.1.0.8 — 2026-10-14
 
 - Highlight listed item names in blue when the same item exists in the four normal inventory bags. Treat NQ and HQ as identical; exclude the Armoury Chest, saddlebags and retainer inventories.

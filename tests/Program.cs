@@ -142,3 +142,24 @@ BagCheck("empty or unavailable bag has no blue match", BagMatchRules.Display(lis
 BagCheck("price evaluation remains undercut for blue item", PriceRules.Evaluate(listed, market, now, 2880) == HighlightStatus.Undercut);
 BagCheck("price counter remains independent of blue", UndercutSummary.Count([new() { CharacterId = 1, RetainerId = 10, Listings = [listed] }], 1, Evaluate).Undercut == 1);
 Console.WriteLine($"PASS: {bagChecks} bag matching and color precedence regression scenarios");
+var retainerBagChecks = 0;
+void RetainerBagCheck(string scenario, bool ok) { retainerBagChecks++; if (!ok) throw new Exception(scenario); }
+var bagRetainers = new List<RetainerSnapshot>
+{
+    new() { CharacterId = 1, RetainerId = 10, CapturedAt = now, Listings = [listed with { Hq = true }] },
+    new() { CharacterId = 1, RetainerId = 11, CapturedAt = now, Listings = [listed with { ItemId = 102 }] },
+    new() { CharacterId = 2, RetainerId = 12, CapturedAt = now, Listings = [listed] },
+    new() { CharacterId = 1, RetainerId = 11, CapturedAt = now.AddDays(-1), Listings = [listed] },
+};
+RetainerBagCheck("HQ retainer listing matches NQ/HQ-neutral bag ID", BagMatchRules.MatchesRetainer(bagRetainers, 1, 10, bagItems));
+RetainerBagCheck("nonmatching latest snapshot wins over matching old snapshot", !BagMatchRules.MatchesRetainer(bagRetainers, 1, 11, bagItems));
+RetainerBagCheck("another character cannot mark current retainer blue", !BagMatchRules.MatchesRetainer(bagRetainers, 1, 12, bagItems));
+RetainerBagCheck("unscanned retainer cannot match", !BagMatchRules.MatchesRetainer(bagRetainers, 1, 13, bagItems));
+RetainerBagCheck("moving item out clears retainer blue", !BagMatchRules.MatchesRetainer(bagRetainers, 1, 10, new HashSet<uint>()));
+RetainerBagCheck("logout has no bag match", !BagMatchRules.MatchesRetainer(bagRetainers, 0, 10, bagItems));
+bagRetainers[0].Listings.Clear();
+RetainerBagCheck("scanned empty retainer loses blue", !BagMatchRules.MatchesRetainer(bagRetainers, 1, 10, bagItems));
+bagRetainers[0].Listings.AddRange([listed with { ItemId = 102 }, listed with { Slot = 1, Hq = true }]);
+RetainerBagCheck("any matching sale slot marks retainer", BagMatchRules.MatchesRetainer(bagRetainers, 1, 10, bagItems));
+RetainerBagCheck("undercut suffix remains independent of blue", UndercutSummary.Count(bagRetainers.Where(x => x.RetainerId == 10), 1, (_, _) => HighlightStatus.Undercut).RetainerSuffix == " (2)");
+Console.WriteLine($"PASS: {retainerBagChecks} retainer-list bag matching regression scenarios");

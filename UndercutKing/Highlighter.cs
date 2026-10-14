@@ -130,6 +130,9 @@ internal sealed unsafe class Highlighter : IDisposable
                 ? summary.Undercut > 0 ? HighlightStatus.Undercut
                     : summary.Unknown > 0 || summary.ScannedRetainers == 0 ? HighlightStatus.Unknown : HighlightStatus.Normal
                 : HighlightStatus.Normal;
+            if (!restoreOnly && plugin.Config.BagMatchHighlight && BagMatchRules.MatchesRetainer(
+                    plugin.Config.Retainers, Plugin.Player.ContentId, id, plugin.BagItems))
+                status = HighlightStatus.BagMatch;
             var suffix = !restoreOnly && plugin.Config.ShowRetainerCount ? summary.RetainerSuffix : "";
             Apply(node, $"{Plugin.Player.ContentId}:{id}", status, retainerNodes, plugin.Config.HighlightTheme, suffix);
         }

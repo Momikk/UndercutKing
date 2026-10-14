@@ -105,7 +105,8 @@ public sealed class Plugin : IDalamudPlugin
                 owners.Select(x => x.Name).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.Name)));
             var captured = Reader.Capture(id);
             Active = captured; // no use of a previous retainer's snapshot while loading
-            BagItems = captured != null && Config.BagMatchHighlight ? Reader.BagItems() ?? new HashSet<uint>() : new HashSet<uint>();
+            BagItems = Config.BagMatchHighlight && (captured != null || NativeReader.RetainerListVisible())
+                ? Reader.BagItems() ?? new HashSet<uint>() : new HashSet<uint>();
             if (captured != null)
             {
                 var old = Config.Retainers.FirstOrDefault(x => x.CharacterId == id && x.RetainerId == captured.RetainerId);

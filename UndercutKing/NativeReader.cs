@@ -122,6 +122,12 @@ internal sealed unsafe class NativeReader : IDisposable
         return BagMatchRules.ItemIds(slots);
     }
 
+    public static bool RetainerListVisible()
+    {
+        var addon = Plugin.GameGui.GetAddonByName("RetainerList");
+        return !addon.IsNull && addon.IsReady && addon.IsVisible;
+    }
+
     public RetainerSnapshot? Capture(ulong characterId)
     {
         var id = ActiveRetainer();
