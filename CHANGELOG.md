@@ -4,6 +4,14 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.6 — 2026-10-14
+
+- Fix quote validity being used as the polling interval. A two-day validity window no longer blocks periodic queries.
+- Poll scanned items for the current character every 5 minutes by default, independently configurable from 1 to 60 minutes, with retainer windows and the market board closed.
+- Existing configurations default to 5-minute polling while retaining their automatic-query toggle and quote validity setting.
+- Throttle retries for old uploads and failed requests; retain per-item deduplication, a maximum of two concurrent requests and a 5-second manual-refresh cooldown.
+- Preserve actual quote timestamps and prefer newer quotes. Universalis depends on player uploads, so periodic queries cannot guarantee real-time prices.
+
 ## 0.1.0.5 — 2026-10-14
 
 - Hide `(0)` in the retainer list when valid quotes confirm no undercut listings, restoring the native sale quantity text.

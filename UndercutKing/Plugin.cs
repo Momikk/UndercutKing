@@ -45,6 +45,7 @@ public sealed class Plugin : IDalamudPlugin
             Interface.SavePluginConfig(Config);
         }
         Config.FreshMinutes = Math.Clamp(Config.FreshMinutes, 1, 30 * 24 * 60);
+        Config.AutomaticRefreshMinutes = Math.Clamp(Config.AutomaticRefreshMinutes, 1, 60);
         if (!Enum.IsDefined(Config.HighlightTheme)) Config.HighlightTheme = HighlightTheme.Auto;
         Prices = new();
         Reader = new(Prices);
@@ -73,7 +74,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         foreach (var snapshot in Config.Retainers.Where(x => x.CharacterId == Player.ContentId))
             foreach (var item in snapshot.Listings.Select(x => x.ItemId).Distinct())
-                Prices.Queue(snapshot.WorldId, item, true, Config.FreshMinutes);
+                Prices.Queue(snapshot.WorldId, item, true, Config.AutomaticRefreshMinutes);
     }
 
     private void Tick(IFramework _)
@@ -109,7 +110,7 @@ public sealed class Plugin : IDalamudPlugin
             if (Config.AutomaticPriceCheck)
                 foreach (var snapshot in Config.Retainers.Where(x => x.CharacterId == id))
                     foreach (var item in snapshot.Listings.Select(x => x.ItemId).Distinct())
-                        Prices.Queue(snapshot.WorldId, item, false, Config.FreshMinutes);
+                        Prices.Queue(snapshot.WorldId, item, false, Config.AutomaticRefreshMinutes);
             if (dirty && DateTimeOffset.UtcNow >= nextSave)
             {
                 Save();

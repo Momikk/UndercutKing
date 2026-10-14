@@ -37,6 +37,13 @@ internal sealed class MainWindow : Window
         if (ImGui.Checkbox("高亮雇员列表", ref retainers)) { config.RetainerHighlight = retainers; plugin.Save(); }
         var automatic = config.AutomaticPriceCheck;
         if (ImGui.Checkbox("自动查询 Universalis 市场价格", ref automatic)) { config.AutomaticPriceCheck = automatic; plugin.Save(); }
+        var refreshMinutes = config.AutomaticRefreshMinutes;
+        if (ImGui.SliderInt("后台刷新间隔（分钟）", ref refreshMinutes, 1, 60))
+        {
+            config.AutomaticRefreshMinutes = refreshMinutes;
+            plugin.Save();
+        }
+        ImGui.TextWrapped("登录且启用自动查询时，后台定期查询已扫描物品，无需打开市场板。刷新间隔与两天报价有效期分开；Universalis 依赖玩家上传，仍可能滞后。");
         var days = config.FreshMinutes / (24f * 60f);
         if (ImGui.SliderFloat("价格有效期（天）", ref days, 1f / (24 * 60), 30, "%.2f"))
         {

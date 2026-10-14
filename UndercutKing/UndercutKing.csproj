@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.5</Version>
+    <Version>0.1.0.6</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,13 +9,15 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>0.1.0.5 更新说明 / Changelog
+    <Changelog>0.1.0.6 更新说明 / Changelog
 中文：
-- 雇员列表已确认被压价数量为零时，不再显示 (0)，恢复原有出售数量文字。
-- 有压价时仍显示数量；报价不完整时保留 (N+) 或 (?) 提示。
+- 修复报价有效期阻止后台查询的问题：默认每 5 分钟查询已扫描物品，可设置 1–60 分钟，无需打开市场板。
+- 后台刷新间隔与两天报价有效期独立；旧上传数据及查询失败仍按间隔重试，不会高频重复请求。
+- Universalis 依赖玩家上传，定时查询不保证实时行情。
 English:
-- Hide (0) in the retainer list when valid quotes confirm no undercut listings, restoring the native sale quantity text.
-- Keep positive counts and (N+) or (?) indicators for incomplete prices.
+- Fix quote validity blocking background queries: poll scanned items every 5 minutes by default, configurable from 1 to 60 minutes without opening the market board.
+- Separate polling from the two-day quote validity window; throttle retries for old uploads and failed requests.
+- Universalis relies on player uploads, so scheduled queries do not guarantee real-time prices.
 完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

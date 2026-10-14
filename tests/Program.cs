@@ -100,3 +100,24 @@ RetainerCheck("colored highlighting uses plain text and one suffix", HighlightTe
 RetainerCheck("disabling decoration restores exact original bytes", HighlightText.Compose(coloredText, "出售中（14件）", HighlightStatus.Normal, "").SequenceEqual(coloredText));
 RetainerCheck("disabling count keeps highlight without suffix", HighlightText.Compose(coloredText, "出售中（14件）", HighlightStatus.Undercut, "").SequenceEqual(originalText));
 Console.WriteLine($"PASS: {retainerChecks} per-retainer count and text decoration regression scenarios");
+var refreshChecks = 0;
+void RefreshCheck(string scenario, bool passes)
+{
+    refreshChecks++;
+    if (!passes) throw new Exception(scenario);
+}
+var sixMinuteQuote = market with { ObservedAt = now.AddMinutes(-6) };
+RefreshCheck("no quote requests immediately", MarketRefreshRules.ShouldRequest(now, null, null, false, 5));
+RefreshCheck("two-day validity does not suppress five-minute polling", PriceRules.Evaluate(listed, sixMinuteQuote, now, 2880) != HighlightStatus.Unknown && MarketRefreshRules.ShouldRequest(now, now.AddMinutes(-6), sixMinuteQuote, false, 5));
+RefreshCheck("fresh game or API quote avoids needless polling", !MarketRefreshRules.ShouldRequest(now, null, market, false, 5));
+RefreshCheck("recent attempts throttle old uploads", !MarketRefreshRules.ShouldRequest(now, now.AddMinutes(-1), market with { ObservedAt = now.AddDays(-3) }, false, 5));
+RefreshCheck("failed queries wait before retrying", !MarketRefreshRules.ShouldRequest(now, now.AddMinutes(-1), null, false, 5));
+RefreshCheck("retry at interval boundary", MarketRefreshRules.ShouldRequest(now, now.AddMinutes(-5), null, false, 5));
+RefreshCheck("quote refresh at interval boundary", MarketRefreshRules.ShouldRequest(now, null, market with { ObservedAt = now.AddMinutes(-5) }, false, 5));
+RefreshCheck("manual refresh bypasses poll interval", MarketRefreshRules.ShouldRequest(now, now.AddSeconds(-6), market, true, 5));
+RefreshCheck("manual refresh keeps five-second cooldown", !MarketRefreshRules.ShouldRequest(now, now.AddSeconds(-4), market, true, 5));
+RefreshCheck("shorter configured interval takes effect", MarketRefreshRules.ShouldRequest(now, now.AddMinutes(-2), sixMinuteQuote, false, 1));
+RefreshCheck("longer configured interval takes effect", !MarketRefreshRules.ShouldRequest(now, now.AddMinutes(-6), sixMinuteQuote, false, 30));
+RefreshCheck("invalid interval cannot hammer the API", !MarketRefreshRules.ShouldRequest(now, now.AddSeconds(-30), null, false, 0));
+RefreshCheck("older uploads never become fresh by fetching them", PriceRules.Evaluate(listed, market with { ObservedAt = now.AddDays(-3) }, now, 2880) == HighlightStatus.Unknown);
+Console.WriteLine($"PASS: {refreshChecks} background refresh scheduling regression scenarios");

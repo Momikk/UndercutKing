@@ -24,7 +24,7 @@ internal sealed class MarketPrices : IDisposable
     private HashSet<string> ownedNames = [];
     public string LastError { get; private set; } = "";
 
-    public MarketPrices() => http.DefaultRequestHeaders.UserAgent.ParseAdd("UndercutKing/0.1.0.3 (+https://github.com/Momikk/UndercutKing)");
+    public MarketPrices() => http.DefaultRequestHeaders.UserAgent.ParseAdd("UndercutKing/0.1.0.6 (+https://github.com/Momikk/UndercutKing)");
     public MarketQuote? Get(uint world, uint item) => quotes.GetValueOrDefault((world, item));
 
     public void SetOwners(IEnumerable<ulong> ids, IEnumerable<string> names)
@@ -33,14 +33,13 @@ internal sealed class MarketPrices : IDisposable
         ownedNames = names.ToHashSet(StringComparer.Ordinal);
     }
 
-    public void Queue(uint world, uint item, bool force, int freshMinutes)
+    public void Queue(uint world, uint item, bool force, int refreshMinutes)
     {
         if (world == 0 || item == 0 || lifetime.IsCancellationRequested) return;
         var key = (world, item);
         var now = DateTimeOffset.UtcNow;
-        if (!force && Get(world, item) is { } existing && now - existing.ObservedAt < TimeSpan.FromMinutes(freshMinutes)) return;
-        // Protect the public API even when a user repeatedly presses refresh or upstream data is old.
-        if (lastAttempts.TryGetValue(key, out var last) && now - last < TimeSpan.FromSeconds(force ? 5 : 60)) return;
+        DateTimeOffset? last = lastAttempts.TryGetValue(key, out var attempted) ? attempted : null;
+        if (!MarketRefreshRules.ShouldRequest(now, last, Get(world, item), force, refreshMinutes)) return;
         if (!pending.TryAdd(key, 0)) return;
         lastAttempts[key] = now;
         var owners = ownedNames.ToHashSet(StringComparer.Ordinal);
@@ -54,6 +53,7 @@ internal sealed class MarketPrices : IDisposable
         {
             await requests.WaitAsync(lifetime.Token).ConfigureAwait(false);
             entered = true;
+            lastAttempts[(world, item)] = DateTimeOffset.UtcNow;
             // Request all listings so both NQ and HQ minima can be determined independently.
             using var response = await http.GetAsync($"https://universalis.app/api/v2/{world}/{item}?listings=100&entries=0", lifetime.Token).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
