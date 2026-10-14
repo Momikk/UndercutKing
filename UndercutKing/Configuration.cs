@@ -8,6 +8,7 @@ public sealed class Configuration : IPluginConfiguration
     public bool ItemHighlight { get; set; } = true;
     public bool RetainerHighlight { get; set; } = true;
     public bool ShowDtrCount { get; set; } = true;
+    public bool ShowRetainerCount { get; set; } = true;
     public bool AutomaticPriceCheck { get; set; } = true;
     public HighlightTheme HighlightTheme { get; set; } = HighlightTheme.Auto;
     public int FreshMinutes { get; set; } = 2 * 24 * 60;

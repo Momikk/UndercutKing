@@ -28,6 +28,9 @@ internal sealed class MainWindow : Window
         }
         var showCount = config.ShowDtrCount;
         if (ImGui.Checkbox("服务器信息栏显示压价数量", ref showCount)) { config.ShowDtrCount = showCount; plugin.Save(); }
+        var retainerCount = config.ShowRetainerCount;
+        if (ImGui.Checkbox("雇员列表显示各雇员压价数量", ref retainerCount)) { config.ShowRetainerCount = retainerCount; plugin.Save(); }
+        ImGui.TextWrapped("雇员市场栏括号内为被压价的上架位数量；(N+) 表示还有价格待确认的商品，(?) 表示数量尚未确认。");
         var item = config.ItemHighlight;
         if (ImGui.Checkbox("高亮雇员销售物品", ref item)) { config.ItemHighlight = item; plugin.Save(); }
         var retainers = config.RetainerHighlight;

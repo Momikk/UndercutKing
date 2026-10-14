@@ -11,7 +11,7 @@ namespace UndercutKing;
 
 internal sealed unsafe class Highlighter : IDisposable
 {
-    private sealed record NodeState(string Identity, byte[] Original, TextAppearance Appearance, byte[] Applied, TextAppearance AppliedAppearance);
+    private sealed record NodeState(string Identity, byte[] Original, string PlainText, TextAppearance Appearance, byte[] Applied, TextAppearance AppliedAppearance);
     private readonly Dictionary<nint, NodeState> saleNodes = [];
     private readonly Dictionary<nint, NodeState> retainerNodes = [];
     private readonly Plugin plugin;
@@ -37,7 +37,7 @@ internal sealed unsafe class Highlighter : IDisposable
         node->TextFlags = (TextFlags)appearance.Flags;
     }
 
-    private static void Apply(AtkTextNode* node, string identity, HighlightStatus status, Dictionary<nint, NodeState> states, HighlightTheme theme = HighlightTheme.Auto)
+    private static void Apply(AtkTextNode* node, string identity, HighlightStatus status, Dictionary<nint, NodeState> states, HighlightTheme theme = HighlightTheme.Auto, string suffix = "")
     {
         var key = (nint)node;
         var current = TextBytes(node);
@@ -56,7 +56,7 @@ internal sealed unsafe class Highlighter : IDisposable
                 WriteAppearance(node, HighlightAppearance.Restore(old.Appearance, ReadAppearance(node), old.AppliedAppearance));
                 states.Remove(key);
             }
-            else if (old.Identity != identity || status == HighlightStatus.Normal)
+            else if (old.Identity != identity || status == HighlightStatus.Normal && suffix.Length == 0)
             {
                 node->SetText(old.Original.AsSpan());
                 WriteAppearance(node, HighlightAppearance.Restore(old.Appearance, ReadAppearance(node), old.AppliedAppearance));
@@ -64,14 +64,13 @@ internal sealed unsafe class Highlighter : IDisposable
                 current = old.Original;
             }
         }
-        if (status == HighlightStatus.Normal) return;
+        if (status == HighlightStatus.Normal && suffix.Length == 0) return;
         if (!states.TryGetValue(key, out var state))
         {
             var text = node->NodeText.StringPtr.AsDalamudSeString().TextValue;
             var original = current;
             var originalAppearance = ReadAppearance(node);
-            node->SetText(text); // strip in-text color payloads so the requested color is visible
-            state = new(identity, original, originalAppearance, TextBytes(node), originalAppearance);
+            state = new(identity, original, text, originalAppearance, current, originalAppearance);
             states[key] = state;
         }
         var currentAppearance = ReadAppearance(node);
@@ -80,9 +79,13 @@ internal sealed unsafe class Highlighter : IDisposable
             {
                 Flags = (ushort)((currentAppearance.Flags & ~HighlightAppearance.EdgeFlag) | (state.Appearance.Flags & HighlightAppearance.EdgeFlag)),
             } };
-        var desired = HighlightAppearance.Apply(status, state.Appearance, theme);
+        var textBytes = HighlightText.Compose(state.Original, state.PlainText, status, suffix);
+        if (!current.SequenceEqual(textBytes)) node->SetText(textBytes.AsSpan());
+        var desired = status == HighlightStatus.Normal
+            ? HighlightAppearance.Restore(state.Appearance, ReadAppearance(node), state.AppliedAppearance)
+            : HighlightAppearance.Apply(status, state.Appearance, theme);
         if (ReadAppearance(node) != desired) WriteAppearance(node, desired);
-        states[key] = state with { AppliedAppearance = desired };
+        states[key] = state with { Applied = TextBytes(node), AppliedAppearance = desired };
     }
 
     private void DrawSales(AddonEvent _, AddonArgs args)
@@ -120,15 +123,13 @@ internal sealed unsafe class Highlighter : IDisposable
             var node = row->GetTextNodeById(11);
             if (node == null || row->ListItemIndex < 0 || row->ListItemIndex >= owners.Count) continue;
             var id = owners[row->ListItemIndex].Id;
-            var snapshot = plugin.Config.Retainers.FirstOrDefault(x => x.CharacterId == Plugin.Player.ContentId && x.RetainerId == id);
-            var status = HighlightStatus.Normal;
-            if (!restoreOnly && plugin.Config.RetainerHighlight)
-            {
-                var results = snapshot?.Listings.Select(x => plugin.Status(snapshot, x)).ToArray();
-                status = results == null ? HighlightStatus.Unknown : results.Contains(HighlightStatus.Undercut)
-                    ? HighlightStatus.Undercut : results.Contains(HighlightStatus.Unknown) ? HighlightStatus.Unknown : HighlightStatus.Normal;
-            }
-            Apply(node, id.ToString(), status, retainerNodes, plugin.Config.HighlightTheme);
+            var summary = UndercutSummary.Count(plugin.Config.Retainers.Where(x => x.RetainerId == id), Plugin.Player.ContentId, plugin.Status);
+            var status = !restoreOnly && plugin.Config.RetainerHighlight
+                ? summary.Undercut > 0 ? HighlightStatus.Undercut
+                    : summary.Unknown > 0 || summary.ScannedRetainers == 0 ? HighlightStatus.Unknown : HighlightStatus.Normal
+                : HighlightStatus.Normal;
+            var suffix = !restoreOnly && plugin.Config.ShowRetainerCount ? summary.RetainerSuffix : "";
+            Apply(node, $"{Plugin.Player.ContentId}:{id}", status, retainerNodes, plugin.Config.HighlightTheme, suffix);
         }
     }
 

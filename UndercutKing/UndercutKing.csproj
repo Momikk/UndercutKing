@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.3</Version>
+    <Version>0.1.0.4</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,13 +9,13 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>0.1.0.3 更新说明 / Changelog
+    <Changelog>0.1.0.4 更新说明 / Changelog
 中文：
-- 改善红色、黄色高亮的可读性，新增自动、浅色界面和深色界面配色。
-- 为高亮文字添加适合背景的描边；关闭高亮或卸载时恢复原始文字样式。
+- 在雇员列表的出售数量后追加各雇员的被压价上架位数量，例如“出售中（14件） (3)”。
+- 报价不完整时显示 (N+) 或 (?)；支持单独关闭计数，关闭或卸载时恢复原始文字。
 English:
-- Improve red and yellow highlight readability with automatic, light and dark theme palettes.
-- Add contrasting text outlines and restore original text styles when highlights are disabled or the plugin is unloaded.
+- Append each retainer's undercut listing-slot count after the native sale quantity, e.g. “出售中（14件） (3)”.
+- Show (N+) or (?) for incomplete prices; allow counts to be disabled independently and restore original text on disable or unload.
 完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

@@ -33,6 +33,10 @@ public static class PriceRules
 
 public sealed record UndercutSummary(int Undercut, int Unknown, int ScannedRetainers)
 {
+    public string RetainerSuffix => Unknown > 0 || ScannedRetainers == 0
+        ? Undercut > 0 ? $" ({Undercut}+)" : " (?)"
+        : $" ({Undercut})";
+
     public string BarText => Unknown > 0 || ScannedRetainers == 0
         ? Undercut > 0 ? $"压价 {Undercut}+" : "压价 ?"
         : $"压价 {Undercut}";

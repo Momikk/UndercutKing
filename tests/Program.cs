@@ -64,3 +64,39 @@ foreach (var status in new[] { HighlightStatus.Undercut, HighlightStatus.Unknown
 }
 AppearanceCheck("normal appearance not changed", HighlightAppearance.Apply(HighlightStatus.Normal, lightOriginal, HighlightTheme.Dark) == lightOriginal);
 Console.WriteLine($"PASS: {appearanceChecks} theme contrast and appearance restoration scenarios");
+var retainerChecks = 0;
+void RetainerCheck(string scenario, bool passes)
+{
+    retainerChecks++;
+    if (!passes) throw new Exception(scenario);
+}
+var retainerSnapshots = new List<RetainerSnapshot>
+{
+    new() { CharacterId = 1, RetainerId = 10, CapturedAt = now, Listings = [listed with { Quantity = 99 }, listed with { Slot = 1, Price = 900 }] },
+    new() { CharacterId = 1, RetainerId = 11, CapturedAt = now, Listings = [listed, listed with { Slot = 1 }] },
+    new() { CharacterId = 2, RetainerId = 10, CapturedAt = now, Listings = [listed, listed with { Slot = 1 }] },
+    new() { CharacterId = 1, RetainerId = 10, CapturedAt = now.AddDays(-1), Listings = [listed, listed with { Slot = 1 }] },
+};
+UndercutSummary ForRetainer(ulong id, Func<RetainerSnapshot, Listing, HighlightStatus>? evaluate = null) =>
+    UndercutSummary.Count(retainerSnapshots.Where(x => x.RetainerId == id), 1, evaluate ?? Evaluate);
+RetainerCheck("counts slots, not stack quantity, and ignores older or foreign-character snapshots", ForRetainer(10).RetainerSuffix == " (1)");
+RetainerCheck("separate retainer count", ForRetainer(11).RetainerSuffix == " (2)");
+RetainerCheck("unscanned retainer is not zero", ForRetainer(12).RetainerSuffix == " (?)");
+RetainerCheck("expired prices are not zero", ForRetainer(10, (_, _) => HighlightStatus.Unknown).RetainerSuffix == " (?)");
+RetainerCheck("partial prices retain confirmed count", ForRetainer(10, (_, item) => item.Slot == 0 ? HighlightStatus.Undercut : HighlightStatus.Unknown).RetainerSuffix == " (1+)");
+retainerSnapshots[0].Listings[0] = listed with { Price = 899 };
+RetainerCheck("repricing clears this retainer's count", ForRetainer(10).RetainerSuffix == " (0)");
+RetainerCheck("repricing does not change another retainer's count", ForRetainer(11).RetainerSuffix == " (2)");
+retainerSnapshots.Add(new() { CharacterId = 1, RetainerId = 12, CapturedAt = now, Listings = [] });
+RetainerCheck("scanned empty retainer has confirmed zero", ForRetainer(12).RetainerSuffix == " (0)");
+var originalText = System.Text.Encoding.UTF8.GetBytes("出售中（14件）\0");
+var coloredText = new byte[] { 2, 19, 2, 1, 3 }.Concat(originalText).ToArray();
+var decorated = HighlightText.Compose(originalText, "出售中（14件）", HighlightStatus.Undercut, " (3)");
+RetainerCheck("append count after original sale quantity", System.Text.Encoding.UTF8.GetString(decorated) == "出售中（14件） (3)\0");
+var updatedText = HighlightText.Compose(originalText, "出售中（14件）", HighlightStatus.Undercut, " (2)");
+RetainerCheck("changing counts does not duplicate suffix", System.Text.Encoding.UTF8.GetString(updatedText) == "出售中（14件） (2)\0");
+RetainerCheck("normal counted text retains original game payloads", HighlightText.Compose(coloredText, "出售中（14件）", HighlightStatus.Normal, " (0)").AsSpan().StartsWith(coloredText.AsSpan(0, coloredText.Length - 1)));
+RetainerCheck("colored highlighting uses plain text and one suffix", HighlightText.Compose(coloredText, "出售中（14件）", HighlightStatus.Unknown, " (?)").SequenceEqual(System.Text.Encoding.UTF8.GetBytes("出售中（14件） (?)\0")));
+RetainerCheck("disabling decoration restores exact original bytes", HighlightText.Compose(coloredText, "出售中（14件）", HighlightStatus.Normal, "").SequenceEqual(coloredText));
+RetainerCheck("disabling count keeps highlight without suffix", HighlightText.Compose(coloredText, "出售中（14件）", HighlightStatus.Undercut, "").SequenceEqual(originalText));
+Console.WriteLine($"PASS: {retainerChecks} per-retainer count and text decoration regression scenarios");

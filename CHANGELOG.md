@@ -4,6 +4,13 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.4 — 2026-10-14
+
+- Append each retainer's undercut listing-slot count after the native sale quantity in the retainer list, e.g. “出售中（14件） (3)”.
+- Count scanned snapshots for each retainer of the current character. Separate listing slots of the same item count individually; recalculate after asking prices or market quotes change.
+- Show `(N+)` or `(?)` when prices are incomplete, and `(0)` when valid quotes confirm no undercut listings.
+- Add an independent retainer-count toggle. Restore original text when counts are disabled, list nodes are reused, or the plugin is unloaded, retaining the existing highlight settings.
+
 ## 0.1.0.3 — 2026-10-14
 
 - Improve red and yellow highlight readability with automatic, light and dark theme palettes.
