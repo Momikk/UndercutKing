@@ -9,14 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>0.1.0.10 更新说明 / Changelog
-中文：
-- 当前雇员出售列表中存在背包同物品蓝色提示时，同时为背包对应格子添加蓝框与浅蓝底色，忽略 NQ/HQ。
-- 跟随背包排序与可见页面定位，关闭出售列表、切换雇员或关闭功能后自动撤掉；提供独立开关，不增加 Universalis 请求。
-English:
-- Mirror blue matches from the active retainer sale list onto matching normal-bag slots with blue borders and a translucent fill, treating NQ/HQ as identical.
-- Follow inventory sorting and visible pages; remove frames on sale-list close, retainer change or disable. Include an independent toggle without additional Universalis requests.
-完整记录 / Full history: https://github.com/Momikk/UndercutKing/blob/main/CHANGELOG.md</Changelog>
+    <Changelog>- 增加背包高亮功能：当当前雇员正在出售相同物品时，高亮背包对应道具
+- Added inventory highlighting: highlight bag items also listed for sale by the current retainer.</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

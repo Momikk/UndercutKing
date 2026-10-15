@@ -6,10 +6,7 @@ This document records changes in published versions. The plugin is an early test
 
 ## 0.1.0.10 — 2026-10-15
 
-- Mirror blue matches from the active retainer sale list onto normal-bag slots with blue borders and a translucent blue fill, treating NQ/HQ as identical.
-- Map display slots through the game's inventory sorter for visible normal, expanded and fully expanded bag pages. Suppress frames while sorting is in progress.
-- Show frames only while the current retainer sale list is open, removing them on window close, character/retainer change, item removal or disable. Do not modify native slot colors or intercept input.
-- Add an independent toggle enabled by default. Use local bag matching without additional Universalis requests.
+- Added inventory highlighting: highlight bag items also listed for sale by the current retainer.
 
 ## 0.1.0.9 — 2026-10-14
 
