@@ -126,13 +126,11 @@ internal sealed unsafe class Highlighter : IDisposable
             if (node == null || row->ListItemIndex < 0 || row->ListItemIndex >= owners.Count) continue;
             var id = owners[row->ListItemIndex].Id;
             var summary = UndercutSummary.Count(plugin.Config.Retainers.Where(x => x.RetainerId == id), Plugin.Player.ContentId, plugin.Status);
-            var status = !restoreOnly && plugin.Config.RetainerHighlight
-                ? summary.Undercut > 0 ? HighlightStatus.Undercut
-                    : summary.Unknown > 0 || summary.ScannedRetainers == 0 ? HighlightStatus.Unknown : HighlightStatus.Normal
-                : HighlightStatus.Normal;
-            if (!restoreOnly && plugin.Config.BagMatchHighlight && BagMatchRules.MatchesRetainer(
-                    plugin.Config.Retainers, Plugin.Player.ContentId, id, plugin.BagItems))
-                status = HighlightStatus.BagMatch;
+            var priceStatus = summary.Undercut > 0 ? HighlightStatus.Undercut
+                : summary.Unknown > 0 || summary.ScannedRetainers == 0 ? HighlightStatus.Unknown : HighlightStatus.Normal;
+            var status = restoreOnly ? HighlightStatus.Normal : BagMatchRules.Prioritize(priceStatus,
+                BagMatchRules.MatchesRetainer(plugin.Config.Retainers, Plugin.Player.ContentId, id, plugin.BagItems),
+                plugin.Config.RetainerHighlight, plugin.Config.BagMatchHighlight);
             var suffix = !restoreOnly && plugin.Config.ShowRetainerCount ? summary.RetainerSuffix : "";
             Apply(node, $"{Plugin.Player.ContentId}:{id}", status, retainerNodes, plugin.Config.HighlightTheme, suffix);
         }

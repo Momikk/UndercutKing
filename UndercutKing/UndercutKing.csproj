@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.10</Version>
+    <Version>0.1.0.11</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 增加背包高亮功能：当当前雇员正在出售相同物品时，高亮背包对应道具
-- Added inventory highlighting: highlight bag items also listed for sale by the current retainer.</Changelog>
+    <Changelog>- 调整高亮优先级：红色优先，其次蓝色，最后黄色
+- Changed highlight priority: red first, then blue, then yellow.</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

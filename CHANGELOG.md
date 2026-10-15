@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.11 — 2026-10-15
+
+- Changed highlight priority: red first, then blue, then yellow.
+
 ## 0.1.0.10 — 2026-10-15
 
 - Added inventory highlighting: highlight bag items also listed for sale by the current retainer.

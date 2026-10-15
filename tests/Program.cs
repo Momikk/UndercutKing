@@ -130,7 +130,7 @@ var bagItems = BagMatchRules.ItemIds([(100u, 1u), (100u, 99u), (101u, 0u), (0u, 
 BagCheck("positive nonempty bag slots only, duplicates merged", bagItems.SetEquals([100u]));
 BagCheck("NQ listing matches bag base ID", BagMatchRules.Display(listed, HighlightStatus.Normal, bagItems, true, true) == HighlightStatus.BagMatch);
 BagCheck("HQ listing matches same bag base ID", BagMatchRules.Display(listed with { Hq = true }, HighlightStatus.Normal, bagItems, true, true) == HighlightStatus.BagMatch);
-BagCheck("blue overrides red visually", BagMatchRules.Display(listed, HighlightStatus.Undercut, bagItems, true, true) == HighlightStatus.BagMatch);
+BagCheck("red overrides blue visually", BagMatchRules.Display(listed, HighlightStatus.Undercut, bagItems, true, true) == HighlightStatus.Undercut);
 BagCheck("blue overrides unknown visually", BagMatchRules.Display(listed, HighlightStatus.Unknown, bagItems, true, true) == HighlightStatus.BagMatch);
 BagCheck("unrelated item keeps price highlight", BagMatchRules.Display(listed with { ItemId = 102 }, HighlightStatus.Undercut, bagItems, true, true) == HighlightStatus.Undercut);
 BagCheck("removing bag item restores price status", BagMatchRules.Display(listed, HighlightStatus.Undercut, new HashSet<uint>(), true, true) == HighlightStatus.Undercut);
@@ -183,3 +183,18 @@ OverlayCheck("first and last normal-bag slots are accepted", BagOverlayRules.Val
 OverlayCheck("saddlebag or corrupt page excluded", !BagOverlayRules.ValidSource(4, 0) && !BagOverlayRules.ValidSource(-1, 0));
 OverlayCheck("out-of-range slot excluded", !BagOverlayRules.ValidSource(0, 35) && !BagOverlayRules.ValidSource(0, -1));
 Console.WriteLine($"PASS: {overlayChecks} mirrored bag highlight gating and slot safety scenarios");
+var priorityChecks = 0;
+void PriorityCheck(string name, HighlightStatus price, bool match, bool redYellowEnabled, bool blueEnabled, HighlightStatus expected)
+{
+    priorityChecks++;
+    if (BagMatchRules.Prioritize(price, match, redYellowEnabled, blueEnabled) != expected) throw new Exception(name);
+}
+PriorityCheck("retainer/item red precedes bag match", HighlightStatus.Undercut, true, true, true, HighlightStatus.Undercut);
+PriorityCheck("retainer/item blue precedes yellow", HighlightStatus.Unknown, true, true, true, HighlightStatus.BagMatch);
+PriorityCheck("red remains without bag match", HighlightStatus.Undercut, false, true, true, HighlightStatus.Undercut);
+PriorityCheck("yellow remains without bag match", HighlightStatus.Unknown, false, true, true, HighlightStatus.Unknown);
+PriorityCheck("normal price can still be blue", HighlightStatus.Normal, true, true, true, HighlightStatus.BagMatch);
+PriorityCheck("disabled price highlighting allows blue", HighlightStatus.Undercut, true, false, true, HighlightStatus.BagMatch);
+PriorityCheck("disabled blue allows yellow", HighlightStatus.Unknown, true, true, false, HighlightStatus.Unknown);
+PriorityCheck("disabled colors stay normal", HighlightStatus.Undercut, true, false, false, HighlightStatus.Normal);
+Console.WriteLine($"PASS: {priorityChecks} shared highlight priority scenarios");

@@ -18,7 +18,13 @@ public static class BagMatchRules
         bool priceHighlight, bool bagHighlight)
     {
         if (listing == null) return HighlightStatus.Normal;
-        if (bagHighlight && bagItems.Contains(listing.ItemId)) return HighlightStatus.BagMatch;
+        return Prioritize(priceStatus, bagItems.Contains(listing.ItemId), priceHighlight, bagHighlight);
+    }
+
+    public static HighlightStatus Prioritize(HighlightStatus priceStatus, bool bagMatch, bool priceHighlight, bool bagHighlight)
+    {
+        if (priceHighlight && priceStatus == HighlightStatus.Undercut) return HighlightStatus.Undercut;
+        if (bagHighlight && bagMatch) return HighlightStatus.BagMatch;
         return priceHighlight ? priceStatus : HighlightStatus.Normal;
     }
 }
