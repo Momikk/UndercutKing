@@ -163,3 +163,23 @@ bagRetainers[0].Listings.AddRange([listed with { ItemId = 102 }, listed with { S
 RetainerBagCheck("any matching sale slot marks retainer", BagMatchRules.MatchesRetainer(bagRetainers, 1, 10, bagItems));
 RetainerBagCheck("undercut suffix remains independent of blue", UndercutSummary.Count(bagRetainers.Where(x => x.RetainerId == 10), 1, (_, _) => HighlightStatus.Undercut).RetainerSuffix == " (2)");
 Console.WriteLine($"PASS: {retainerBagChecks} retainer-list bag matching regression scenarios");
+var overlayChecks = 0;
+void OverlayCheck(string scenario, bool ok) { overlayChecks++; if (!ok) throw new Exception(scenario); }
+var activeSale = new RetainerSnapshot { CharacterId = 1, RetainerId = 10, Listings = [listed, listed with { Slot = 1, Hq = true }, listed with { ItemId = 102 }] };
+HashSet<uint> OverlayTargets(RetainerSnapshot? snapshot = null, ulong character = 1, ulong retainer = 10, bool visible = true, bool blue = true, bool mirror = true) =>
+    BagOverlayRules.Targets(snapshot ?? activeSale, character, retainer, visible, blue, mirror, bagItems);
+OverlayCheck("only blue matches of current sale list, qualities and repeated listings merged", OverlayTargets().SetEquals([100u]));
+OverlayCheck("closing sale list removes bag frames", OverlayTargets(visible: false).Count == 0);
+OverlayCheck("another retainer does not inherit frames", OverlayTargets(retainer: 11).Count == 0);
+OverlayCheck("another character does not inherit frames", OverlayTargets(character: 2).Count == 0);
+OverlayCheck("logged out shows no frames", OverlayTargets(character: 0).Count == 0);
+OverlayCheck("no active retainer shows no frames", OverlayTargets(retainer: 0).Count == 0);
+OverlayCheck("blue feature off removes frames", OverlayTargets(blue: false).Count == 0);
+OverlayCheck("independent mirror toggle removes frames", OverlayTargets(mirror: false).Count == 0);
+OverlayCheck("missing live sale snapshot shows no frames", BagOverlayRules.Targets(null, 1, 10, true, true, true, bagItems).Count == 0);
+OverlayCheck("empty retainer shows no frames", OverlayTargets(new() { CharacterId = 1, RetainerId = 10 }).Count == 0);
+OverlayCheck("removed bag item clears frames", BagOverlayRules.Targets(activeSale, 1, 10, true, true, true, new HashSet<uint>()).Count == 0);
+OverlayCheck("first and last normal-bag slots are accepted", BagOverlayRules.ValidSource(0, 0) && BagOverlayRules.ValidSource(3, 34));
+OverlayCheck("saddlebag or corrupt page excluded", !BagOverlayRules.ValidSource(4, 0) && !BagOverlayRules.ValidSource(-1, 0));
+OverlayCheck("out-of-range slot excluded", !BagOverlayRules.ValidSource(0, 35) && !BagOverlayRules.ValidSource(0, -1));
+Console.WriteLine($"PASS: {overlayChecks} mirrored bag highlight gating and slot safety scenarios");

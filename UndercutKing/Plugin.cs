@@ -27,6 +27,7 @@ public sealed class Plugin : IDalamudPlugin
     internal RetainerSnapshot? Active { get; private set; }
     internal IReadOnlySet<uint> BagItems { get; private set; } = new HashSet<uint>();
     private readonly Highlighter highlighter;
+    private readonly BagOverlay bagOverlay;
     private readonly WindowSystem windows = new("UndercutKing");
     private readonly MainWindow main;
     private readonly DtrCounter dtrCounter;
@@ -63,6 +64,7 @@ public sealed class Plugin : IDalamudPlugin
         Commands.AddHandler("/undercutking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王设置与价格状态。" });
         Commands.AddHandler("/uking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王。" });
         Interface.UiBuilder.Draw += windows.Draw;
+        bagOverlay = new(this);
         Interface.UiBuilder.OpenMainUi += Open;
         Interface.UiBuilder.OpenConfigUi += Open;
         MarketBoard.OfferingsReceived += Receive;
@@ -145,6 +147,7 @@ public sealed class Plugin : IDalamudPlugin
         Framework.Update -= Tick;
         MarketBoard.OfferingsReceived -= Receive;
         dtrCounter.Dispose();
+        bagOverlay.Dispose();
         highlighter.Dispose();
         Reader.Dispose();
         Prices.Dispose();

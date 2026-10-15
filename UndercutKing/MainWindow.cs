@@ -35,6 +35,8 @@ internal sealed class MainWindow : Window
         if (ImGui.Checkbox("高亮雇员销售物品", ref item)) { config.ItemHighlight = item; plugin.Save(); }
         var bagMatch = config.BagMatchHighlight;
         if (ImGui.Checkbox("背包同物品标蓝（不区分 NQ/HQ）", ref bagMatch)) { config.BagMatchHighlight = bagMatch; plugin.Save(); }
+        var mirrorBags = config.HighlightMatchingBagSlots;
+        if (ImGui.Checkbox("打开出售列表时，同时高亮背包对应格子", ref mirrorBags)) { config.HighlightMatchingBagSlots = mirrorBags; plugin.Save(); }
         ImGui.TextWrapped("蓝色：普通背包四栏中有同物品；出售列表标蓝对应物品，雇员总列表标蓝该雇员的市场文字。蓝色优先于红黄文字颜色，压价数量和价格状态仍按报价判断。不包含兵装库、鞍囊和雇员背包。");
         var retainers = config.RetainerHighlight;
         if (ImGui.Checkbox("高亮雇员列表", ref retainers)) { config.RetainerHighlight = retainers; plugin.Save(); }

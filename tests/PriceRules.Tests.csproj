@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="../UndercutKing/Models.cs" Link="Models.cs" />
     <Compile Include="../UndercutKing/BagMatchRules.cs" Link="BagMatchRules.cs" />
+    <Compile Include="../UndercutKing/BagOverlayRules.cs" Link="BagOverlayRules.cs" />
     <Compile Include="../UndercutKing/HighlightAppearance.cs" Link="HighlightAppearance.cs" />
     <Compile Include="../UndercutKing/HighlightText.cs" Link="HighlightText.cs" />
     <Compile Include="../UndercutKing/MarketRefreshRules.cs" Link="MarketRefreshRules.cs" />
