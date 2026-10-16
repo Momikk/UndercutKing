@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## Unreleased
+
+- Simplified the README to make features and installation easier to find.
+
 ## 0.1.0.11 — 2026-10-15
 
 - Changed highlight priority: red first, then blue, then yellow.
