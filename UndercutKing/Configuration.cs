@@ -13,6 +13,8 @@ public sealed class Configuration : IPluginConfiguration
     public bool ShowRetainerCount { get; set; } = true;
     public bool AutomaticPriceCheck { get; set; } = true;
     public bool UseMarketPush { get; set; } = true;
+    public bool LimitBackgroundFps { get; set; } = true;
+    public int BackgroundFps { get; set; } = 20;
     public int AutomaticRefreshMinutes { get; set; } = 15;
     public HighlightTheme HighlightTheme { get; set; } = HighlightTheme.Auto;
     public int FreshMinutes { get; set; } = 2 * 24 * 60;

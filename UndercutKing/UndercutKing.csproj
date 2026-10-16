@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.11</Version>
+    <Version>0.1.0.12</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 调整高亮优先级：红色优先，其次蓝色，最后黄色
-- Changed highlight priority: red first, then blue, then yellow.</Changelog>
+    <Changelog>- 增加后台限帧功能：游戏失去焦点时限制帧数，可自定义，默认 20 帧。
+- Added a customizable background frame cap, defaulting to 20 FPS when the game loses focus.</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

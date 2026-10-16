@@ -28,6 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     internal IReadOnlySet<uint> BagItems { get; private set; } = new HashSet<uint>();
     private readonly Highlighter highlighter;
     private readonly BagOverlay bagOverlay;
+    private readonly BackgroundFrameLimiter backgroundFrameLimiter;
     private readonly WindowSystem windows = new("UndercutKing");
     private readonly MainWindow main;
     private readonly DtrCounter dtrCounter;
@@ -54,6 +55,7 @@ public sealed class Plugin : IDalamudPlugin
             Interface.SavePluginConfig(Config);
         }
         Config.AutomaticRefreshMinutes = Math.Clamp(Config.AutomaticRefreshMinutes, 1, 60);
+        Config.BackgroundFps = FramePacer.ClampFps(Config.BackgroundFps);
         if (!Enum.IsDefined(Config.HighlightTheme)) Config.HighlightTheme = HighlightTheme.Auto;
         Prices = new();
         Reader = new(Prices);
@@ -69,6 +71,7 @@ public sealed class Plugin : IDalamudPlugin
         Interface.UiBuilder.OpenConfigUi += Open;
         MarketBoard.OfferingsReceived += Receive;
         Framework.Update += Tick;
+        backgroundFrameLimiter = new(Config);
         Log.Information("UndercutKing loaded: inventory hook={Inventory}, market hook={Market}", Reader.InventoryHookReady, Reader.MarketHookReady);
     }
 
@@ -145,6 +148,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         disposed = true;
         Framework.Update -= Tick;
+        backgroundFrameLimiter.Dispose();
         MarketBoard.OfferingsReceived -= Receive;
         dtrCounter.Dispose();
         bagOverlay.Dispose();

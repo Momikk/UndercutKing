@@ -4,7 +4,9 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
-## Unreleased
+## 0.1.0.12 — 2026-10-16
+
+- Added a customizable background frame cap, defaulting to 20 FPS when the game loses focus.
 
 - Simplified the README to make features and installation easier to find.
 - Consolidated code credits and third-party license notices.

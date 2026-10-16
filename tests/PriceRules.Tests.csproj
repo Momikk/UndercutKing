@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../UndercutKing/FramePacer.cs" Link="FramePacer.cs" />
     <Compile Include="../UndercutKing/Models.cs" Link="Models.cs" />
     <Compile Include="../UndercutKing/BagMatchRules.cs" Link="BagMatchRules.cs" />
     <Compile Include="../UndercutKing/BagOverlayRules.cs" Link="BagOverlayRules.cs" />

@@ -19,6 +19,18 @@ internal sealed class MainWindow : Window
     {
         ImGui.TextWrapped("红色：售价高于同物品的市场最低价，不区分 NQ/HQ；黄色：市场数据未知或已过期。改价后自动重新读取售价。仅提示，不自动改价。");
         var config = plugin.Config;
+        var limitBackground = config.LimitBackgroundFps;
+        if (ImGui.Checkbox("游戏失去焦点时限制帧数", ref limitBackground)) { config.LimitBackgroundFps = limitBackground; plugin.Save(); }
+        if (config.LimitBackgroundFps)
+        {
+            var backgroundFps = config.BackgroundFps;
+            if (ImGui.InputInt("后台帧数上限（5–240）", ref backgroundFps))
+            {
+                config.BackgroundFps = FramePacer.ClampFps(backgroundFps);
+                plugin.Save();
+            }
+            ImGui.TextWrapped("默认 20 帧；切回游戏后恢复正常运行。游戏或显卡设置的更低帧数限制仍然生效。");
+        }
         var theme = (int)config.HighlightTheme;
         string[] themes = ["自动识别", "浅色界面", "深色界面"];
         if (ImGui.Combo("高亮配色", ref theme, themes, themes.Length))
