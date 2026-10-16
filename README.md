@@ -52,6 +52,6 @@
 
 Copyright (C) 2026 Momikk；原作者贡献的版权归原作者所有。
 
-本项目采用 **GNU Affero General Public License v3.0 或更新版本（AGPL-3.0-or-later）** 授权，完整条款见 [LICENSE.md](LICENSE.md)。部分库存与界面交互代码改编自 Critical_Impact 的 [Allagan Market](https://github.com/Critical-Impact/AllaganMarket)，来源与修改说明见 [NOTICE.md](NOTICE.md)。
+本项目采用 **GNU Affero General Public License v3.0 或更新版本（AGPL-3.0-or-later）** 授权，完整条款见 [LICENSE.md](LICENSE.md)。
 
-MongoDB.Bson 采用 Apache-2.0 授权，完整许可见 [第三方声明](THIRD-PARTY-LICENSES.md)。
+代码来源、修改记录及第三方许可见[来源声明](NOTICE.md)。

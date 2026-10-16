@@ -7,6 +7,7 @@ This document records changes in published versions. The plugin is an early test
 ## Unreleased
 
 - Simplified the README to make features and installation easier to find.
+- Consolidated code credits and third-party license notices.
 
 ## 0.1.0.11 — 2026-10-15
 
