@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.12</Version>
+    <Version>0.1.0.13</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 增加后台限帧功能：游戏失去焦点时限制帧数，可自定义，默认 20 帧。
-- Added a customizable background frame cap, defaulting to 20 FPS when the game loses focus.</Changelog>
+    <Changelog>- 召唤雇员后自动更新在售物品和压价数量，无需打开出售列表；数据未收齐时保留旧记录。
+- Refresh listings and undercut counts after summoning a retainer without opening the sale list; keep previous records until data is ready.</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

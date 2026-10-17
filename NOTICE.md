@@ -13,3 +13,5 @@
 安装包包含未修改的 MongoDB.Bson 3.5.2，Copyright © 2010-present MongoDB Inc.，采用 Apache-2.0；来源与完整许可见 [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md)。压价之王本身继续采用 AGPL-3.0-or-later。
 
 2026-10-15，0.1.0.10：新增背包匹配格子的临时描框显示，布局与排序映射研究参考 HaselTweaks 的 InventoryHighlight（https://github.com/Haselnussbomber/HaselTweaks，AGPL-3.0）及 FFXIVClientStructs 的 ItemOrderModule/AddonInventoryGrid 结构；格子描框、当前雇员筛选及设置由 Momikk 独立实现，不引入上述插件程序集。
+
+2026-10-17，0.1.0.13：Momikk 将在售数据读取与出售列表显示顺序分离，召唤雇员进入主菜单后即可读取有效记录；增加当前雇员加载归属、在售数量核对及显示顺序验证。沿用前述 Allagan Market 库存交互来源与许可。

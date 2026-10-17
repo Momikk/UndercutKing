@@ -109,7 +109,7 @@ public sealed class Plugin : IDalamudPlugin
             Prices.SetOwners(owners.Select(x => x.Id).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.RetainerId)),
                 owners.Select(x => x.Name).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.Name)));
             var captured = Reader.Capture(id);
-            Active = captured; // no use of a previous retainer's snapshot while loading
+            Active = Reader.ForSaleList(captured); // only live UI-mapped rows may be highlighted
             BagItems = Config.BagMatchHighlight && (captured != null || NativeReader.RetainerListVisible())
                 ? Reader.BagItems() ?? new HashSet<uint>() : new HashSet<uint>();
             if (captured != null)

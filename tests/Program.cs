@@ -2,6 +2,7 @@ using UndercutKing;
 
 if (args.Contains("--probe")) { await TransportRegression.ProbeAsync(); return; }
 FramePacerRegression.Run();
+RetainerCaptureRegression.Run();
 
 var now = DateTimeOffset.UtcNow;
 var listed = new Listing(0, 0, 100, false, 1, 1000);

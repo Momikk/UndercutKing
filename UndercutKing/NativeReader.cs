@@ -20,7 +20,7 @@ internal sealed unsafe class NativeReader : IDisposable
     private delegate void* ContainerPacket(int sequence, int* packet);
     private delegate void MarketPacket(uint sequence, nint packet);
     private readonly MarketPrices prices;
-    private ulong loadedForRetainer;
+    private readonly RetainerLoadState loadState = new();
     public bool InventoryHookReady => inventoryHook?.IsEnabled == true;
     public bool MarketHookReady => marketHook?.IsEnabled == true;
     public string Error { get; private set; } = "";
@@ -59,6 +59,7 @@ internal sealed unsafe class NativeReader : IDisposable
         var retainer = 0UL;
         try
         {
+            loadState.Observe(ActiveRetainer());
             if (packet != null)
             {
                 var payload = (byte*)packet + 16;
@@ -69,7 +70,7 @@ internal sealed unsafe class NativeReader : IDisposable
         }
         catch (Exception ex) { Plugin.Log.Error(ex, "Could not observe retainer inventory packet"); }
         var result = inventoryHook!.Original(sequence, packet);
-        if (retainer != 0 && retainer == ActiveRetainer()) loadedForRetainer = retainer;
+        if (retainer != 0 && retainer == ActiveRetainer()) loadState.Received(retainer);
         return result;
     }
 
@@ -131,24 +132,15 @@ internal sealed unsafe class NativeReader : IDisposable
     public RetainerSnapshot? Capture(ulong characterId)
     {
         var id = ActiveRetainer();
-        if (id == 0) loadedForRetainer = 0;
         // A retainer change invalidates loading even if the old container still looks populated.
-        if (!InventoryHookReady || id == 0 || id != loadedForRetainer || Plugin.Objects.LocalPlayer is not { } player) return null;
-        var addonRef = Plugin.GameGui.GetAddonByName("RetainerSellList");
-        if (addonRef.IsNull || !addonRef.IsReady || !addonRef.IsVisible) return null;
-        var addon = (AtkUnitBase*)addonRef.Address;
-        if (addon->AtkValues == null || addon->AtkValuesCount < 263) return null;
+        var ready = loadState.Ready(id);
+        if (!InventoryHookReady || !ready || Plugin.Objects.LocalPlayer is not { } player) return null;
+        var saleVisible = Visible("RetainerSellList");
+        if (!saleVisible && !Visible("SelectString")) return null;
         var manager = InventoryManager.Instance();
         if (manager == null) return null;
         var container = manager->GetInventoryContainer(InventoryType.RetainerMarket);
         if (container == null || !container->IsLoaded || container->Items == null || container->Size != 20) return null;
-        var menuIndexes = new Dictionary<int, int>();
-        for (var i = 0; i < 20; i++)
-        {
-            var value = addon->AtkValues[15 + i * 13];
-            if (value.Type == 0 || value.Int < 0 || value.Int >= 20) continue;
-            menuIndexes.TryAdd(value.Int, i);
-        }
         var result = new RetainerSnapshot
         {
             CharacterId = characterId, RetainerId = id, WorldId = player.HomeWorld.RowId,
@@ -159,16 +151,49 @@ internal sealed unsafe class NativeReader : IDisposable
         {
             var item = container->Items[slot];
             if (item.ItemId == 0) continue;
-            if (!menuIndexes.TryGetValue(slot, out var menu)) return null; // incomplete/rebuilding UI
+            if (item.Quantity <= 0) return null;
             var price = manager->GetRetainerMarketPrice(slot);
             if (price == 0 || price > uint.MaxValue) return null; // wait for the price packet, never replace a known price with zero
-            result.Listings.Add(new(slot, menu, item.ItemId, (item.Flags & InventoryItem.ItemFlags.HighQuality) != 0,
+            result.Listings.Add(new(slot, -1, item.ItemId, (item.Flags & InventoryItem.ItemFlags.HighQuality) != 0,
                 (uint)item.Quantity, (uint)price));
         }
+        // At the summon menu, do not mistake a partly populated container for a
+        // completed sale. The overview count includes occupied slots, not quantity.
+        if (!saleVisible)
+        {
+            var retainers = RetainerManager.Instance();
+            if (retainers == null || !retainers->IsReady) return null;
+            var owner = retainers->GetActiveRetainer();
+            if (owner == null || owner->RetainerId != id || owner->MarketItemCount != result.Listings.Count) return null;
+        }
+        else if (ForSaleList(result) == null) return null; // keep incomplete UI rebuilds out of the saved snapshot
         return result;
     }
 
-    public void Reset() => loadedForRetainer = 0;
+    private static bool Visible(string name)
+    {
+        var addon = Plugin.GameGui.GetAddonByName(name);
+        return !addon.IsNull && addon.IsReady && addon.IsVisible;
+    }
+
+    public RetainerSnapshot? ForSaleList(RetainerSnapshot? snapshot)
+    {
+        if (snapshot == null || snapshot.RetainerId != ActiveRetainer()) return null;
+        var addonRef = Plugin.GameGui.GetAddonByName("RetainerSellList");
+        if (addonRef.IsNull || !addonRef.IsReady || !addonRef.IsVisible) return null;
+        var addon = (AtkUnitBase*)addonRef.Address;
+        if (addon->AtkValues == null || addon->AtkValuesCount < 263) return null;
+        var order = new Dictionary<int, int>();
+        for (var i = 0; i < 20; i++)
+        {
+            var value = addon->AtkValues[15 + i * 13];
+            if (value.Type == 0 || value.Int < 0 || value.Int >= 20) continue;
+            order.TryAdd(value.Int, i);
+        }
+        return RetainerCaptureRules.ForSaleList(snapshot, order);
+    }
+
+    public void Reset() => loadState.Reset();
     public void Dispose()
     {
         inventoryHook?.Disable();

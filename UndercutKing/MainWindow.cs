@@ -73,7 +73,7 @@ internal sealed class MainWindow : Window
         }
         if (ImGui.Button("设为两天")) { config.FreshMinutes = 2 * 24 * 60; plugin.Save(); }
         if (ImGui.Button("刷新已扫描雇员的市场价格")) plugin.Refresh();
-        ImGui.TextWrapped("首次使用请依次打开各雇员的销售列表。Universalis 数据可能滞后；游戏内比较价格得到的完整列表优先使用。");
+        ImGui.TextWrapped("首次使用请依次召唤各雇员，收到完整在售数据后自动更新；数据未收齐时保留旧记录。Universalis 数据可能滞后；游戏内比较价格得到的完整列表优先使用。");
         if (plugin.Reader.Error.Length != 0) ImGui.TextColored(new Vector4(1, .35f, .35f, 1), plugin.Reader.Error);
         if (plugin.Prices.LastError.Length != 0) ImGui.TextWrapped(plugin.Prices.LastError);
         ImGui.Separator();
