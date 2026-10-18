@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.19</Version>
+    <Version>0.1.0.20</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 颜色示例使用实际红、蓝、黄高亮配色，缩小选项行距和分组留白。
-- Color samples now use the actual red, blue, and yellow highlights; tightened option rows and group spacing.</Changelog>
+    <Changelog>- 移除「常用」和「价格状态」标签，保留四个设置分类，颜色示例移到雇员提示页。
+- Removed the Common and Price Status tabs, keeping four settings categories and moving color samples to Retainer Highlights.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

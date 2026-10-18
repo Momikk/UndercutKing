@@ -4,13 +4,12 @@ using KamiToolKit.BaseTypes;
 using KamiToolKit.Classes;
 using KamiToolKit.Nodes;
 using Lumina.Data.Parsing.Uld;
-using Lumina.Excel.Sheets;
 
 namespace UndercutKing;
 
 internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
 {
-    private static readonly string[] Pages = ["常用", "背包提示", "雇员提示", "市场数据", "后台限帧", "价格状态"];
+    private static readonly string[] Pages = ["背包提示", "雇员提示", "市场数据", "后台限帧"];
     private readonly List<NodeBase> owned = [];
     private readonly List<(CheckboxNode Node, Func<bool> Read)> checks = [];
     private readonly List<(NumericInputNode Node, Func<int> Read, Func<bool> Enabled)> numbers = [];
@@ -19,8 +18,6 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     private TabBarNode? tabs;
     private readonly List<ResNode> panels = [];
     private TextNode? network;
-    private TextNode? quoteTitle;
-    private ListNode<NativePriceRow, NativePriceRowNode>? prices;
     private int selected;
     private bool syncing;
     private bool pendingOpen;
@@ -53,12 +50,10 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
             AddOwned(panel);
             panels.Add(panel);
         }
-        BuildCommon(panels[0]);
-        BuildBags(panels[1]);
-        BuildRetainers(panels[2]);
-        BuildMarket(panels[3]);
-        BuildPerformance(panels[4]);
-        BuildPrices(panels[5]);
+        BuildBags(panels[0]);
+        BuildRetainers(panels[1]);
+        BuildMarket(panels[2]);
+        BuildPerformance(panels[3]);
         Select(selected);
         SyncControls();
         RefreshStatus();
@@ -142,21 +137,15 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         dropdown.AttachNode(panel);
         themes.Add(dropdown);
     }
-    private void BuildCommon(ResNode panel)
+    private void BuildLegend(ResNode panel, float y)
     {
-        Group(panel, "常用提示", 0);
-        ItemCheck(panel, 32);
-        MixedCheck(panel, 62);
-        DtrCheck(panel, 92);
-        Group(panel, "外观", 130);
-        Theme(panel, 162);
         (string Label, HighlightStatus Status)[] samples =
             [("红色：被压价", HighlightStatus.Undercut), ("蓝色：同物品", HighlightStatus.BagMatch), ("黄色：待更新", HighlightStatus.Unknown)];
         for (var i = 0; i < samples.Length; i++)
         {
             var node = new TextNode
             {
-                String = samples[i].Label, Position = new(i * 148, 200), Size = new(140, 24),
+                String = samples[i].Label, Position = new(i * 148, y), Size = new(140, 24),
                 FontSize = 13, AlignmentType = AlignmentType.Left, UseThemeEmboss = false,
                 TextFlags = TextFlags.Edge,
             };
@@ -199,6 +188,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
             "在每名雇员出售数量后显示压价数量，零不显示。+ 表示还有报价待确认，? 表示数量未知。");
         DtrCheck(panel, 164);
         Theme(panel, 204);
+        BuildLegend(panel, 244);
     }
     private void BuildMarket(ResNode panel)
     {
@@ -252,24 +242,6 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         Number(panel, "后台帧数上限", 72, 5, 240, () => plugin.Config.BackgroundFps,
             value => plugin.Config.BackgroundFps = value, () => plugin.Config.LimitBackgroundFps);
         Text(panel, "默认 20 帧，切回游戏后恢复正常运行。", 114);
-    }
-    private void BuildPrices(ResNode panel)
-    {
-        quoteTitle = Text(panel, "打开雇员出售列表以查看当前物品。", 0);
-        string[] headers = ["物品", "我的单价", "最低价", "状态"];
-        for (var i = 0; i < headers.Length; i++)
-        {
-            var (x, width) = NativePriceRowNode.Column(i, panelWidth - 24);
-            new TextNode { String = headers[i], Position = new(x, 34), Size = new(width, 24), FontSize = 13 }.AttachNode(panel);
-        }
-        prices = new ListNode<NativePriceRow, NativePriceRowNode>
-        {
-            OptionsList = [], AutoResetScroll = false, ItemSpacing = 0,
-            Position = new(0, 64), Size = new(panelWidth, panel.Height - 70),
-        };
-        prices.NoResultsTextNode.TextId = 0;
-        prices.NoResultsTextNode.String = "打开雇员出售列表以查看当前物品。";
-        prices.AttachNode(panel);
     }
     private void Select(int page)
     {
@@ -331,25 +303,13 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     }
     private void RefreshStatus()
     {
-        if (network != null && selected == 3)
+        if (network != null && selected == 2)
         {
             var state = string.Join("\n", new[] { plugin.Prices.NetworkStatus,
                 plugin.Prices.PushError, plugin.Prices.LastError, plugin.Reader.Error }.Where(x => x.Length != 0));
             network.String = state;
             network.TextTooltip = state;
         }
-        if (prices == null || quoteTitle == null || selected != 5) return;
-        var active = plugin.Active;
-        quoteTitle.String = active == null ? "打开雇员出售列表以查看当前物品。" : $"{active.Name} · {active.Listings.Count} 件在售物品";
-        var rows = active == null ? [] : active.Listings.OrderBy(x => x.MenuIndex).Select(listing =>
-        {
-            var quote = plugin.Prices.Get(active.WorldId, listing.ItemId);
-            var name = Plugin.Data.GetExcelSheet<Item>().GetRowOrDefault(listing.ItemId)?.Name.ToString() ?? listing.ItemId.ToString();
-            var status = plugin.Status(active, listing);
-            return new NativePriceRow(name + (listing.Hq ? " HQ" : ""), listing.Price.ToString("N0"), quote?.Lowest?.ToString("N0") ?? "—",
-                status == HighlightStatus.Undercut ? "被压价" : status == HighlightStatus.Unknown ? "待刷新" : "正常", quote?.Source ?? "未知");
-        }).ToList();
-        if (!prices.OptionsList.SequenceEqual(rows)) prices.OptionsList = rows;
     }
     protected override void OnFinalize(AtkUnitBase* addon)
     {
@@ -357,9 +317,8 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         // managed bindings are then cleared before the next allocation.
         foreach (var node in owned) node.Dispose();
         owned.Clear(); panels.Clear(); checks.Clear(); numbers.Clear(); themes.Clear(); legend.Clear();
-        network = quoteTitle = null;
+        network = null;
         tabs = null;
-        prices = null;
         freshnessInput = null;
     }
 }
