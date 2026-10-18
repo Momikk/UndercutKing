@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.18 — 2026-10-18
+
+- Removed help buttons and the bottom help area, kept hover tips, and separated option labels from checkboxes to avoid clipping.
+
 ## 0.1.0.17 — 2026-10-18
 
 - Switched settings to top tabs, fixed truncated option labels, and replaced blank help buttons with visible labels.

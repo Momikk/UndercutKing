@@ -16,7 +16,6 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     private readonly List<StringDropDownNode> themes = [];
     private TabBarNode? tabs;
     private readonly List<ResNode> panels = [];
-    private TextNode? help;
     private TextNode? network;
     private TextNode? quoteTitle;
     private ListNode<NativePriceRow, NativePriceRowNode>? prices;
@@ -48,17 +47,10 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         {
             var page = i;
             tabs.AddTab(Pages[i], () => Select(page));
-            var panel = new ResNode { Position = origin + new Vector2(6, 46), Size = new(panelWidth, size.Y - 112) };
+            var panel = new ResNode { Position = origin + new Vector2(6, 46), Size = new(panelWidth, size.Y - 58) };
             AddOwned(panel);
             panels.Add(panel);
         }
-        AddOwned(new HorizontalLineNode { Position = origin + new Vector2(0, size.Y - 62), Size = new(size.X, 2) });
-        help = new TextNode
-        {
-            Position = origin + new Vector2(2, size.Y - 55), Size = new(size.X - 4, 50), FontSize = 12,
-            TextFlags = TextFlags.MultiLine | TextFlags.WordWrap,
-        };
-        AddOwned(help);
         BuildCommon(panels[0]);
         BuildBags(panels[1]);
         BuildRetainers(panels[2]);
@@ -90,19 +82,34 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     }
     private void Check(ResNode panel, string label, float y, Func<bool> read, Action<bool> write, string hint)
     {
+        void Apply(bool value)
+        {
+            if (syncing || read() == value) return;
+            write(value);
+            Changed();
+        }
         var node = new CheckboxNode
         {
-            String = label, IsChecked = read(), DisableAutoResize = true,
-            Position = new(0, y), Size = new(panelWidth - 86, 26), TextTooltip = hint,
-            OnClick = value => { if (syncing || read() == value) return; write(value); Changed(); },
+            String = "", IsChecked = read(),
+            Position = new(0, y), Size = new(26, 26), TextTooltip = hint,
+            OnClick = Apply,
         };
         node.AttachNode(panel);
         checks.Add((node, read));
-        new TextButtonNode
+        // The native checkbox can reset its internal label width on initialization.
+        // Keep the visible text outside that component's clipping/layout entirely.
+        var text = new TextNode
         {
-            String = "说明", Position = new(panelWidth - 70, y), Size = new(68, 28), TextTooltip = hint,
-            OnClick = () => { if (help != null) help.String = hint; },
-        }.AttachNode(panel);
+            String = label, Position = new(30, y), Size = new(panelWidth - 32, 28),
+            FontSize = 14, AlignmentType = AlignmentType.Left, TextTooltip = hint,
+        };
+        text.AddEvent(AtkEventType.MouseClick, () =>
+        {
+            var value = !read();
+            node.IsChecked = value;
+            Apply(value); // SetChecked may already have fired OnClick; Apply is idempotent.
+        });
+        text.AttachNode(panel);
     }
     private void Number(ResNode panel, string label, float y, int min, int max, Func<int> read, Action<int> write, Func<bool>? enabled = null)
     {
@@ -218,7 +225,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         numbers.Add((freshnessInput, () => plugin.Config.FreshMinutes, () => true));
         new TextButtonNode { String = "刷新报价", Position = new(0, 244), Size = new(112, 28),
             TextTooltip = "刷新已扫描雇员的市场报价，遵守请求队列和限流等待。",
-            OnClick = () => { plugin.Refresh(); if (help != null) help.String = "已提交报价刷新，遵守限流等待。"; } }.AttachNode(panel);
+            OnClick = plugin.Refresh }.AttachNode(panel);
         network = Text(panel, "", 286, 58, true);
         dropdown.AttachNode(panel); // popup stays above numeric controls and the refresh button
     }
@@ -262,8 +269,6 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
                 tabs.TabButtons[i].IsSelected = i == selected;
             }
         }
-        if (help != null) help.String = selected == 3 ? "默认每 15 分钟核对，报价有效期为两天。自定义单位为分钟。"
-            : "更改自动保存。悬停或点击右侧“说明”查看功能介绍。";
         SyncControls();
         RefreshStatus();
     }
@@ -271,7 +276,6 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     {
         plugin.Save();
         SyncControls();
-        if (help != null) help.String = "设置已保存。";
     }
     private void SyncControls()
     {
@@ -324,7 +328,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         // managed bindings are then cleared before the next allocation.
         foreach (var node in owned) node.Dispose();
         owned.Clear(); panels.Clear(); checks.Clear(); numbers.Clear(); themes.Clear();
-        help = network = quoteTitle = null;
+        network = quoteTitle = null;
         tabs = null;
         prices = null;
         freshnessInput = null;
