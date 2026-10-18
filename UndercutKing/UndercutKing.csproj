@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.15</Version>
+    <Version>0.1.0.16</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,12 +9,15 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 增加背包 NQ/HQ 共存提示：同物品同时存在两种品质时，用蓝框标出对应格子。
-- Added blue bag-slot highlights for items present in both NQ and HQ quality.</Changelog>
+    <Changelog>- 设置界面改为游戏原生窗口，按左侧分类整理功能，说明收进帮助提示，价格明细单独显示。
+- Rebuilt settings with native game controls, sidebar categories, help tips, and a separate price-details page.</Changelog>
     <Nullable>enable</Nullable>
+    <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../vendor/KamiToolKit/KamiToolKit.csproj" />
+    <Content Include="../vendor/KamiToolKit/LICENSE" Link="licenses/KamiToolKit-MIT.txt" CopyToOutputDirectory="Always" />
     <PackageReference Include="MongoDB.Bson" Version="3.5.2" />
     <Content Include="../LICENSE.md" Link="LICENSE.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../NOTICE.md" Link="NOTICE.md" CopyToOutputDirectory="PreserveNewest" />

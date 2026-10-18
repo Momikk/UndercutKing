@@ -17,3 +17,5 @@ dotnet run --project tests/PriceRules.Tests.csproj -c Release
 ## 验证记录
 
 构建、价格判断回归测试、静态签名检查及安装包核对见 [validation.md](validation.md)。实机交互的验证状态以该记录为准。
+
+原生设置窗口使用 vendor/KamiToolKit 源码，构建会生成独立的 UndercutKing.KamiToolKit.dll。原生窗口和节点操作应在 Framework 线程执行；关闭与卸载需等待节点销毁。额外生命周期检查：dotnet run --project tests-native-ui/NativeUiLifecycle.Tests.csproj -c Release（先运行 Release 构建）。

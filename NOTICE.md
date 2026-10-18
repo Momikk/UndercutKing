@@ -17,3 +17,5 @@
 2026-10-17，0.1.0.13：Momikk 将在售数据读取与出售列表显示顺序分离，召唤雇员进入主菜单后即可读取有效记录；增加当前雇员加载归属、在售数量核对及显示顺序验证。沿用前述 Allagan Market 库存交互来源与许可。
 
 2026-10-18，0.1.0.14：Momikk 参考 Allagan Market 的 RetainerMarketService 菜单生命周期读取与 MarketPriceUpdaterService.PostOpen，在 SelectString 显示和关闭前刷新当前雇员记录；保留本插件的槽位映射、有效售价和数据隔离检查。
+
+2026-10-18，0.1.0.16：Momikk 将设置重构为独立实现的原生左侧分类窗口。原生组件使用 KamiToolKit（MidoriKami，MIT），采用套装之王中的 API 15 源码快照，依赖程序集独立命名为 UndercutKing.KamiToolKit。完整来源、修改和许可见 THIRD-PARTY-LICENSES.md 与 vendor/KamiToolKit/LICENSE。

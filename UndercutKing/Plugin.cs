@@ -1,13 +1,13 @@
 using Dalamud.Game.Command;
 using Dalamud.Game.Network.Structures;
-using Dalamud.Interface.Windowing;
+using KamiToolKit;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
 namespace UndercutKing;
 
-public sealed class Plugin : IDalamudPlugin
+public sealed class Plugin : IAsyncDalamudPlugin
 {
     [PluginService] internal static IDalamudPluginInterface Interface { get; private set; } = null!;
     [PluginService] internal static ICommandManager Commands { get; private set; } = null!;
@@ -29,8 +29,8 @@ public sealed class Plugin : IDalamudPlugin
     private readonly Highlighter highlighter;
     private readonly BagOverlay bagOverlay;
     private readonly BackgroundFrameLimiter backgroundFrameLimiter;
-    private readonly WindowSystem windows = new("UndercutKing");
-    private readonly MainWindow main;
+    private NativeSettingsWindow? main;
+    private bool nativeUiReady;
     private readonly DtrCounter dtrCounter;
     private DateTimeOffset nextTick;
     private DateTimeOffset nextSave;
@@ -60,13 +60,10 @@ public sealed class Plugin : IDalamudPlugin
         Prices = new();
         Reader = new(Prices);
         highlighter = new(this);
-        main = new(this);
         dtrCounter = new(this, Open);
         Reader.SnapshotReady += MenuSnapshot;
-        windows.AddWindow(main);
         Commands.AddHandler("/undercutking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王设置与价格状态。" });
         Commands.AddHandler("/uking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王。" });
-        Interface.UiBuilder.Draw += windows.Draw;
         bagOverlay = new(this);
         Interface.UiBuilder.OpenMainUi += Open;
         Interface.UiBuilder.OpenConfigUi += Open;
@@ -76,8 +73,24 @@ public sealed class Plugin : IDalamudPlugin
         Log.Information("UndercutKing loaded: inventory hook={Inventory}, market hook={Market}", Reader.InventoryHookReady, Reader.MarketHookReady);
     }
 
-    private void Open() => main.IsOpen = true;
-    private void OnCommand(string command, string args) => main.Toggle();
+    public async Task LoadAsync(CancellationToken cancellationToken)
+    {
+        await KamiToolKitLibrary.InitializeAsync(Interface);
+        nativeUiReady = true;
+        cancellationToken.ThrowIfCancellationRequested();
+        await Framework.Run(() => main = new NativeSettingsWindow(this)
+        {
+            InternalName = "UndercutKingSettings", Title = "压价之王 UndercutKing", Size = new(720, 520),
+        });
+    }
+
+    private void Open() => QueueWindow(false);
+    private void OnCommand(string command, string args) => QueueWindow(true);
+    private void QueueWindow(bool toggle) => _ = Framework.Run(() =>
+    {
+        if (disposed || main == null) return;
+        if (toggle && main.IsOpen) main.Close(); else main.RequestOpen();
+    });
     private void Receive(IMarketBoardCurrentOfferings offerings) => Prices.Receive(offerings);
     internal HighlightStatus Status(RetainerSnapshot snapshot, Listing listing) => PriceRules.Evaluate(listing,
         Prices.Get(snapshot.WorldId, listing.ItemId), DateTimeOffset.UtcNow, Config.FreshMinutes);
@@ -113,6 +126,7 @@ public sealed class Plugin : IDalamudPlugin
         nextTick = DateTimeOffset.UtcNow.AddMilliseconds(250);
         try
         {
+            main?.TickPendingOpen();
             var id = Player.ContentId;
             if (id != characterId)
             {
@@ -153,24 +167,27 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         disposed = true;
-        Framework.Update -= Tick;
-        Reader.SnapshotReady -= MenuSnapshot;
-        backgroundFrameLimiter.Dispose();
-        MarketBoard.OfferingsReceived -= Receive;
-        dtrCounter.Dispose();
-        bagOverlay.Dispose();
-        highlighter.Dispose();
-        Reader.Dispose();
-        Prices.Dispose();
-        Interface.UiBuilder.Draw -= windows.Draw;
-        Interface.UiBuilder.OpenMainUi -= Open;
-        Interface.UiBuilder.OpenConfigUi -= Open;
-        Commands.RemoveHandler("/undercutking");
-        Commands.RemoveHandler("/uking");
-        windows.RemoveAllWindows();
-        Save();
+        await Framework.Run(() =>
+        {
+            Framework.Update -= Tick;
+            Reader.SnapshotReady -= MenuSnapshot;
+            backgroundFrameLimiter.Dispose();
+            MarketBoard.OfferingsReceived -= Receive;
+            dtrCounter.Dispose();
+            bagOverlay.Dispose();
+            highlighter.Dispose();
+            Reader.Dispose();
+            Prices.Dispose();
+            Interface.UiBuilder.OpenMainUi -= Open;
+            Interface.UiBuilder.OpenConfigUi -= Open;
+            Commands.RemoveHandler("/undercutking");
+            Commands.RemoveHandler("/uking");
+            Save();
+        });
+        if (main != null) await main.DisposeAsync();
+        if (nativeUiReady) await KamiToolKitLibrary.DisposeAsync();
     }
 }

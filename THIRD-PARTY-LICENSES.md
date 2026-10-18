@@ -1,3 +1,13 @@
+# KamiToolKit
+
+Native UI components by MidoriKami, Copyright (c) 2024 MidoriKami, distributed under MIT.
+
+Source: https://github.com/Dalamud-DailyRoutines/KamiToolKit at e6f316bcb06da25020f2d300345b339789fa7efb; original project: https://github.com/MidoriKami/KamiToolKit.
+
+Vendored from Momikk/SuitKing's API 15 source snapshot (a9ca2102fdc25b26c9c9bc2f923f571bdc2a38e8). Retains its nullable annotations/build compatibility, native color-theme support, and closed-window title lifecycle fix. UndercutKing renames the assembly to UndercutKing.KamiToolKit and runs remaining asynchronous native-node cleanup on the framework thread. No SuitKing equipment workflows are included. The settings window and price-list composition are implemented by Momikk for UndercutKing.
+
+The full copyright and MIT license are preserved in [vendor/KamiToolKit/LICENSE](vendor/KamiToolKit/LICENSE) and distributed as licenses/KamiToolKit-MIT.txt. UndercutKing remains AGPL-3.0-or-later.
+
 # MongoDB.Bson 3.5.2
 
 Copyright © 2010-present MongoDB Inc.
