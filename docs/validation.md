@@ -1,5 +1,14 @@
 # 首版验证记录
 
+## 0.1.0.14 菜单生命周期刷新
+
+2026-10-18：用户反馈 0.1.0.13 仍需打开出售列表才清除旧压价计数。对照本地 Allagan Market 的 RetainerMarketService（SelectString PostSetup / LoadInitialItems）和 MarketPriceUpdaterService（PostShow 读取售价）确认原版在菜单生命周期中主动读取，而非只依赖节流检查。本版改为监听 SelectString PostShow、PreHide、PreFinalize：当前雇员 ID 有效时读取、提交并立即刷新服务器计数；定时检查仍处理延迟就绪与列表映射。卸载注销全部监听与事件。
+
+移除主菜单 MarketItemCount 一致性门槛，概览计数可能仍为旧值，不适合作为当前容器读取的强制条件。菜单可作为当前雇员就绪边界，不再仅依赖库存通知到达时已存在有效雇员 ID；这覆盖通知先于 ID 的情况。保留当前角色和雇员校验、IsLoaded、20 槽边界、有效数量与非零有效售价、出售列表完整映射。菜单关闭前读取不依赖 IsVisible，避免退出阶段错过最后一次更新。没有新增原生 Hook 或网络请求。
+
+新增与原有全部回归通过，其中召唤读取相关 19 项覆盖无归属通知、菜单建立归属、切换/退出隔离、无有效雇员的其他菜单、主菜单价格更新解除压价及映射安全。Release 0 警告、0 错误。以上为源码对照、回归程序和编译结果；本次未加载游戏或操作运行中进程，截图所示问题的实际触发条件、菜单实际数据时序、快速进出和空雇员仍需游戏内验收，不将通过回归等同于实机修复已确认。
+
+
 ## 0.1.0.13 召唤后更新在售记录
 
 2026-10-17：Capture 在当前雇员 SelectString 主菜单或 RetainerSellList 显示时读取 RetainerMarket；召唤菜单不再依赖出售列表 AtkValues。要求当前雇员收到容器通知、容器已加载且有 20 个槽、所有占用槽数量及售价有效。主菜单额外核对 RetainerManager 当前雇员 ID 和 MarketItemCount；未就绪返回 null，不覆盖旧记录。退出或切换雇员清除加载归属。价格统计保存物理槽快照，MenuIndex=-1；仅当前出售列表显示且映射完整时生成临时 UI 快照，用于名称与背包高亮。没有新增 Hook、主动请求或加快 Universalis 查询。

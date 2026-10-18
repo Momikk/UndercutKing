@@ -13,6 +13,10 @@ internal sealed class RetainerLoadState
     }
 
     internal void Received(ulong id) { Observe(id); loaded = id; }
+    // The game has opened the current retainer's interaction menu. Like Allagan
+    // Market, this is also a readiness boundary: inventory packets may precede
+    // ActiveRetainerId, so requiring a packet observed with this ID loses them.
+    internal void MenuReady(ulong id) { if (id != 0) { Observe(id); loaded = id; } }
     internal bool Ready(ulong id) { Observe(id); return id != 0 && loaded == id; }
     internal void Reset() { active = 0; loaded = 0; }
 }

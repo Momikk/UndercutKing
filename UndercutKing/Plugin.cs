@@ -62,6 +62,7 @@ public sealed class Plugin : IDalamudPlugin
         highlighter = new(this);
         main = new(this);
         dtrCounter = new(this, Open);
+        Reader.SnapshotReady += MenuSnapshot;
         windows.AddWindow(main);
         Commands.AddHandler("/undercutking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王设置与价格状态。" });
         Commands.AddHandler("/uking", new CommandInfo(OnCommand) { HelpMessage = "打开压价之王。" });
@@ -81,6 +82,23 @@ public sealed class Plugin : IDalamudPlugin
     internal HighlightStatus Status(RetainerSnapshot snapshot, Listing listing) => PriceRules.Evaluate(listing,
         Prices.Get(snapshot.WorldId, listing.ItemId), DateTimeOffset.UtcNow, Config.FreshMinutes);
     internal void Save() { Interface.SavePluginConfig(Config); dirty = false; }
+
+    private void StoreSnapshot(RetainerSnapshot captured)
+    {
+        var old = Config.Retainers.FirstOrDefault(x => x.CharacterId == captured.CharacterId && x.RetainerId == captured.RetainerId);
+        if (old != null && old.Listings.SequenceEqual(captured.Listings) && old.Name == captured.Name && old.WorldId == captured.WorldId) return;
+        if (old != null) Config.Retainers.Remove(old);
+        Config.Retainers.Add(captured);
+        dirty = true;
+    }
+
+    private void MenuSnapshot(RetainerSnapshot captured)
+    {
+        if (disposed || captured.CharacterId != Player.ContentId) return;
+        StoreSnapshot(captured);
+        if (dirty) Save();
+        dtrCounter.Update(); // commit before the game returns to RetainerList
+    }
 
     internal void Refresh()
     {
@@ -112,16 +130,7 @@ public sealed class Plugin : IDalamudPlugin
             Active = Reader.ForSaleList(captured); // only live UI-mapped rows may be highlighted
             BagItems = Config.BagMatchHighlight && (captured != null || NativeReader.RetainerListVisible())
                 ? Reader.BagItems() ?? new HashSet<uint>() : new HashSet<uint>();
-            if (captured != null)
-            {
-                var old = Config.Retainers.FirstOrDefault(x => x.CharacterId == id && x.RetainerId == captured.RetainerId);
-                if (old == null || !old.Listings.SequenceEqual(captured.Listings) || old.Name != captured.Name || old.WorldId != captured.WorldId)
-                {
-                    if (old != null) Config.Retainers.Remove(old);
-                    Config.Retainers.Add(captured);
-                    dirty = true;
-                }
-            }
+            if (captured != null) StoreSnapshot(captured);
             Prices.Watch(Config.Retainers.Where(x => x.CharacterId == id)
                 .SelectMany(x => x.Listings.Select(item => (x.WorldId, item.ItemId))), Config.AutomaticPriceCheck && Config.UseMarketPush, Config.AutomaticPriceCheck);
             if (Config.AutomaticPriceCheck)
@@ -148,6 +157,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         disposed = true;
         Framework.Update -= Tick;
+        Reader.SnapshotReady -= MenuSnapshot;
         backgroundFrameLimiter.Dispose();
         MarketBoard.OfferingsReceived -= Receive;
         dtrCounter.Dispose();

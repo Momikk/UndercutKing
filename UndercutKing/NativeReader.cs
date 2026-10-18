@@ -1,6 +1,8 @@
 // Inventory/network signatures and UI ordering adapted from Critical_Impact/AllaganMarket.
 // Modified by Momikk, 2026-10-13, under AGPL-3.0-or-later. See NOTICE.md.
 using System.Runtime.InteropServices;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -24,6 +26,7 @@ internal sealed unsafe class NativeReader : IDisposable
     public bool InventoryHookReady => inventoryHook?.IsEnabled == true;
     public bool MarketHookReady => marketHook?.IsEnabled == true;
     public string Error { get; private set; } = "";
+    internal event Action<RetainerSnapshot>? SnapshotReady;
 
     public NativeReader(MarketPrices prices)
     {
@@ -42,6 +45,29 @@ internal sealed unsafe class NativeReader : IDisposable
             inventoryHook?.Disable();
             marketHook?.Disable();
         }
+        foreach (var type in MenuEvents) Plugin.Addons.RegisterListener(type, "SelectString", MenuChanged);
+    }
+
+    private static readonly AddonEvent[] MenuEvents =
+        [AddonEvent.PostShow, AddonEvent.PreHide, AddonEvent.PreFinalize];
+
+    private void MenuChanged(AddonEvent type, AddonArgs args)
+    {
+        try
+        {
+            var id = ActiveRetainer();
+            if (id == 0 || Plugin.Player.ContentId == 0) return;
+            loadState.MenuReady(id);
+            // Before hide/finalize, the menu may already report invisible. The
+            // callback itself supplies the current interaction boundary.
+            var snapshot = Capture(Plugin.Player.ContentId, true);
+            if (snapshot != null)
+            {
+                SnapshotReady?.Invoke(snapshot);
+                Plugin.Log.Debug("Retainer snapshot refreshed at {Event}: {Retainer}, {Slots} slots", type, id, snapshot.Listings.Count);
+            }
+        }
+        catch (Exception ex) { Plugin.Log.Error(ex, "Could not refresh retainer snapshot at menu transition"); }
     }
 
     public static ulong ActiveRetainer()
@@ -129,14 +155,18 @@ internal sealed unsafe class NativeReader : IDisposable
         return !addon.IsNull && addon.IsReady && addon.IsVisible;
     }
 
-    public RetainerSnapshot? Capture(ulong characterId)
+    public RetainerSnapshot? Capture(ulong characterId, bool menuTransition = false)
     {
         var id = ActiveRetainer();
+        // Also retry while the menu is visible if its PostShow preceded the ID
+        // or a price becoming available. Do not depend on the overview's count.
+        var menuVisible = Visible("SelectString");
+        if (menuVisible) loadState.MenuReady(id);
         // A retainer change invalidates loading even if the old container still looks populated.
         var ready = loadState.Ready(id);
         if (!InventoryHookReady || !ready || Plugin.Objects.LocalPlayer is not { } player) return null;
         var saleVisible = Visible("RetainerSellList");
-        if (!saleVisible && !Visible("SelectString")) return null;
+        if (!saleVisible && !menuVisible && !menuTransition) return null;
         var manager = InventoryManager.Instance();
         if (manager == null) return null;
         var container = manager->GetInventoryContainer(InventoryType.RetainerMarket);
@@ -157,16 +187,7 @@ internal sealed unsafe class NativeReader : IDisposable
             result.Listings.Add(new(slot, -1, item.ItemId, (item.Flags & InventoryItem.ItemFlags.HighQuality) != 0,
                 (uint)item.Quantity, (uint)price));
         }
-        // At the summon menu, do not mistake a partly populated container for a
-        // completed sale. The overview count includes occupied slots, not quantity.
-        if (!saleVisible)
-        {
-            var retainers = RetainerManager.Instance();
-            if (retainers == null || !retainers->IsReady) return null;
-            var owner = retainers->GetActiveRetainer();
-            if (owner == null || owner->RetainerId != id || owner->MarketItemCount != result.Listings.Count) return null;
-        }
-        else if (ForSaleList(result) == null) return null; // keep incomplete UI rebuilds out of the saved snapshot
+        if (saleVisible && ForSaleList(result) == null) return null; // incomplete UI rebuild
         return result;
     }
 
@@ -196,6 +217,7 @@ internal sealed unsafe class NativeReader : IDisposable
     public void Reset() => loadState.Reset();
     public void Dispose()
     {
+        foreach (var type in MenuEvents) Plugin.Addons.UnregisterListener(type, "SelectString", MenuChanged);
         inventoryHook?.Disable();
         marketHook?.Disable();
         inventoryHook?.Dispose();

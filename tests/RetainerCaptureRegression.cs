@@ -16,6 +16,15 @@ internal static class RetainerCaptureRegression
         Check(!loading.Ready(10), "Dismiss/re-summon must require fresh data");
         loading.Received(10); loading.Reset();
         Check(!loading.Ready(10), "Character change must clear load ownership");
+        loading.Received(0); // market container arrived before ActiveRetainerId
+        Check(!loading.Ready(10), "An unowned packet alone must not authorize a snapshot");
+        loading.MenuReady(10);
+        Check(loading.Ready(10), "Menu readiness must bind the current retainer even if its packet preceded its ID");
+        Check(!loading.Ready(20), "A previous menu must not authorize a different retainer");
+        loading.MenuReady(20);
+        Check(loading.Ready(20), "The next retainer's menu must establish its own readiness");
+        loading.Reset(); loading.MenuReady(0);
+        Check(!loading.Ready(10), "Unrelated menus without an active retainer must not authorize a snapshot");
         var snapshot = new RetainerSnapshot
         {
             CharacterId = 1, RetainerId = 10, WorldId = 1167, Name = "test",
@@ -35,6 +44,9 @@ internal static class RetainerCaptureRegression
         snapshot.Listings.Clear();
         Check(UndercutSummary.Count([snapshot], 1, Status).Undercut == 0 &&
             RetainerCaptureRules.ForSaleList(snapshot, new Dictionary<int, int>()) != null, "Confirmed empty retainer must clear counts");
+        snapshot.Listings.Add(new(7, -1, 200, false, 1, 800));
+        Check(UndercutSummary.Count([snapshot], 1, Status).Undercut == 0,
+            "A fresh competitive summon-menu price must clear the previous undercut without opening the sale list");
         Console.WriteLine($"PASS: {checks} summon capture ownership, sold-slot counts and live UI mapping scenarios");
     }
 }

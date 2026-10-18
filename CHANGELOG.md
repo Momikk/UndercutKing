@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.14 — 2026-10-18
+
+- Fixed stale undercut counts after summoning a retainer; refresh when the menu opens and before returning to the retainer list.
+
 ## 0.1.0.13 — 2026-10-17
 
 - Refresh listings and undercut counts after summoning a retainer without opening the sale list; keep previous records until data is ready.
