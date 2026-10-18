@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.18</Version>
+    <Version>0.1.0.19</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 移除设置右侧说明按钮和底部说明区，保留悬浮提示，并改为独立文字显示选项，避免截断。
-- Removed help buttons and the bottom help area, kept hover tips, and separated option labels from checkboxes to avoid clipping.</Changelog>
+    <Changelog>- 颜色示例使用实际红、蓝、黄高亮配色，缩小选项行距和分组留白。
+- Color samples now use the actual red, blue, and yellow highlights; tightened option rows and group spacing.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

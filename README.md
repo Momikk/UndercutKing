@@ -6,7 +6,7 @@
 
 面向《最终幻想 XIV》雇员市场的 Dalamud 插件，帮助你发现被压价的商品和背包中的同类物品。
 
-**当前版本为早期测试版（0.1.0.18）**。
+**当前版本为早期测试版（0.1.0.19）**。
 
 [中文更新记录](CHANGELOG.zh-CN.md) · [English Changelog](CHANGELOG.md)
 
