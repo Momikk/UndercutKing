@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.16</Version>
+    <Version>0.1.0.17</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 设置界面改为游戏原生窗口，按左侧分类整理功能，说明收进帮助提示，价格明细单独显示。
-- Rebuilt settings with native game controls, sidebar categories, help tips, and a separate price-details page.</Changelog>
+    <Changelog>- 设置改为顶部标签，修复选项文字被截断，帮助按钮改为清晰可见的「说明」。
+- Switched settings to top tabs, fixed truncated option labels, and replaced blank help buttons with visible labels.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

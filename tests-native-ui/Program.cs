@@ -17,6 +17,20 @@ Run();
 [MethodImpl(MethodImplOptions.NoInlining)]
 static unsafe void Run()
 {
+    // Only owned test memory is accessed: no game node allocation or invocation.
+    var labelMemory = (AtkTextNode*)NativeMemory.AllocZeroed((nuint)sizeof(AtkTextNode));
+    try
+    {
+        var label = (TextNode)RuntimeHelpers.GetUninitializedObject(typeof(TextNode));
+        typeof(NodeBase<AtkTextNode>).GetProperty("Node")!.SetValue(label, Pointer.Box(labelMemory, typeof(AtkTextNode*)));
+        var checkbox = (CheckboxNode)RuntimeHelpers.GetUninitializedObject(typeof(CheckboxNode));
+        typeof(CheckboxNode).GetField("<Label>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(checkbox, label);
+        labelMemory->TextFlags = TextFlags.Ellipsis;
+        Check(checkbox.DisableAutoResize, "Fixed-width checkbox labels use the full assigned width rather than their initial short width");
+        labelMemory->TextFlags = TextFlags.AutoAdjustNodeSize;
+        Check(!checkbox.DisableAutoResize, "Auto-sized checkbox labels still report automatic sizing");
+    }
+    finally { NativeMemory.Free(labelMemory); }
     Check(typeof(NativeAddon).Assembly.GetName().Name == "UndercutKing.KamiToolKit", "Native UI dependency is isolated from other plugins");
     const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
     var addon = (NativeAddon)RuntimeHelpers.GetUninitializedObject(typeof(NativeAddon));

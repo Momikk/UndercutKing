@@ -126,7 +126,7 @@ public unsafe class CheckboxNode : ComponentNode<AtkComponentCheckBox, AtkUldCom
     /// </summary>
     public bool DisableAutoResize
     {
-        get => Label.TextFlags.HasFlag(TextFlags.AutoAdjustNodeSize);
+        get => !Label.TextFlags.HasFlag(TextFlags.AutoAdjustNodeSize);
         set
         {
             if (value)

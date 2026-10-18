@@ -14,9 +14,8 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     private readonly List<(CheckboxNode Node, Func<bool> Read)> checks = [];
     private readonly List<(NumericInputNode Node, Func<int> Read, Func<bool> Enabled)> numbers = [];
     private readonly List<StringDropDownNode> themes = [];
-    private readonly List<TextButtonNode> navigation = [];
+    private TabBarNode? tabs;
     private readonly List<ResNode> panels = [];
-    private TextNode? title;
     private TextNode? help;
     private TextNode? network;
     private TextNode? quoteTitle;
@@ -42,23 +41,17 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     {
         var origin = ContentStartPosition;
         var size = ContentSize;
-        panelWidth = size.X - 160;
+        panelWidth = size.X - 12;
+        tabs = new TabBarNode { Position = origin, Size = new(size.X, 30) };
+        AddOwned(tabs);
         for (var i = 0; i < Pages.Length; i++)
         {
             var page = i;
-            var button = new TextButtonNode
-            {
-                String = Pages[i], Position = origin + new Vector2(0, i * 43), Size = new(130, 34),
-                OnClick = () => Select(page),
-            };
-            AddOwned(button);
-            navigation.Add(button);
-            var panel = new ResNode { Position = origin + new Vector2(156, 34), Size = new(panelWidth, size.Y - 100) };
+            tabs.AddTab(Pages[i], () => Select(page));
+            var panel = new ResNode { Position = origin + new Vector2(6, 46), Size = new(panelWidth, size.Y - 112) };
             AddOwned(panel);
             panels.Add(panel);
         }
-        title = new TextNode { Position = origin + new Vector2(156, 0), Size = new(panelWidth, 28), FontSize = 16 };
-        AddOwned(title);
         AddOwned(new HorizontalLineNode { Position = origin + new Vector2(0, size.Y - 62), Size = new(size.X, 2) });
         help = new TextNode
         {
@@ -100,14 +93,14 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         var node = new CheckboxNode
         {
             String = label, IsChecked = read(), DisableAutoResize = true,
-            Position = new(0, y), Size = new(panelWidth - 38, 26), TextTooltip = hint,
+            Position = new(0, y), Size = new(panelWidth - 86, 26), TextTooltip = hint,
             OnClick = value => { if (syncing || read() == value) return; write(value); Changed(); },
         };
         node.AttachNode(panel);
         checks.Add((node, read));
         new TextButtonNode
         {
-            String = "?", Position = new(panelWidth - 28, y), Size = new(26, 26), TextTooltip = hint,
+            String = "说明", Position = new(panelWidth - 70, y), Size = new(68, 28), TextTooltip = hint,
             OnClick = () => { if (help != null) help.String = hint; },
         }.AttachNode(panel);
     }
@@ -263,11 +256,14 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         for (var i = 0; i < panels.Count; i++)
         {
             panels[i].IsVisible = i == selected;
-            navigation[i].String = (i == selected ? "▶ " : "") + Pages[i];
+            if (tabs != null)
+            {
+                tabs.TabButtons[i].IsChecked = i == selected;
+                tabs.TabButtons[i].IsSelected = i == selected;
+            }
         }
-        if (title != null) title.String = Pages[selected];
         if (help != null) help.String = selected == 3 ? "默认每 15 分钟核对，报价有效期为两天。自定义单位为分钟。"
-            : "更改自动保存。悬停或点击 ? 查看说明。";
+            : "更改自动保存。悬停或点击右侧“说明”查看功能介绍。";
         SyncControls();
         RefreshStatus();
     }
@@ -327,8 +323,9 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         // Dispose descendants while their native parents are still alive. All
         // managed bindings are then cleared before the next allocation.
         foreach (var node in owned) node.Dispose();
-        owned.Clear(); panels.Clear(); navigation.Clear(); checks.Clear(); numbers.Clear(); themes.Clear();
-        title = help = network = quoteTitle = null;
+        owned.Clear(); panels.Clear(); checks.Clear(); numbers.Clear(); themes.Clear();
+        help = network = quoteTitle = null;
+        tabs = null;
         prices = null;
         freshnessInput = null;
     }

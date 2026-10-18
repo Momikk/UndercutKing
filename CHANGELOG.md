@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.17 — 2026-10-18
+
+- Switched settings to top tabs, fixed truncated option labels, and replaced blank help buttons with visible labels.
+
 ## 0.1.0.16 — 2026-10-18
 
 - Rebuilt settings with native game controls, sidebar categories, help tips, and a separate price-details page.

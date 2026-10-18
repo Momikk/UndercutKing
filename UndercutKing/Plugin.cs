@@ -80,7 +80,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         cancellationToken.ThrowIfCancellationRequested();
         await Framework.Run(() => main = new NativeSettingsWindow(this)
         {
-            InternalName = "UndercutKingSettings", Title = "压价之王 UndercutKing", Size = new(720, 520),
+            InternalName = "UndercutKingSettings", Title = "压价之王 UndercutKing", Size = new(760, 560),
         });
     }
 

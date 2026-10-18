@@ -215,3 +215,5 @@ Apache License
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+KamiToolKit local fix in 0.1.0.17: corrected CheckboxNode.DisableAutoResize to report the inverse of AutoAdjustNodeSize, matching its setter and allowing fixed-width labels to occupy their assigned width. Original MIT licensing is retained.
