@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.15 — 2026-10-18
+
+- Added blue bag-slot highlights for items present in both NQ and HQ quality.
+
 ## 0.1.0.14 — 2026-10-18
 
 - Fixed stale undercut counts after summoning a retainer; refresh when the menu opens and before returning to the retainer list.

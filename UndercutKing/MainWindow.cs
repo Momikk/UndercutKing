@@ -49,6 +49,9 @@ internal sealed class MainWindow : Window
         if (ImGui.Checkbox("背包同物品标蓝（不区分 NQ/HQ）", ref bagMatch)) { config.BagMatchHighlight = bagMatch; plugin.Save(); }
         var mirrorBags = config.HighlightMatchingBagSlots;
         if (ImGui.Checkbox("打开出售列表时，同时高亮背包对应格子", ref mirrorBags)) { config.HighlightMatchingBagSlots = mirrorBags; plugin.Save(); }
+        var mixedQualities = config.HighlightMixedQualities;
+        if (ImGui.Checkbox("背包中同物品同时有 NQ/HQ 时，高亮两种品质的格子", ref mixedQualities)) { config.HighlightMixedQualities = mixedQualities; plugin.Save(); }
+        ImGui.TextWrapped("NQ/HQ 共存提示只需打开普通背包，无需召唤雇员；移走其中一种品质后自动取消。");
         ImGui.TextWrapped("颜色优先级：红色（被压价）> 蓝色（普通背包有同物品）> 黄色（报价待确认）。出售物品和雇员总列表使用相同优先级；背包对应格子仍可用于查找同物品。不包含兵装库、鞍囊和雇员背包。");
         var retainers = config.RetainerHighlight;
         if (ImGui.Checkbox("高亮雇员列表", ref retainers)) { config.RetainerHighlight = retainers; plugin.Save(); }

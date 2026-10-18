@@ -8,6 +8,7 @@ public sealed class Configuration : IPluginConfiguration
     public bool ItemHighlight { get; set; } = true;
     public bool BagMatchHighlight { get; set; } = true;
     public bool HighlightMatchingBagSlots { get; set; } = true;
+    public bool HighlightMixedQualities { get; set; } = true;
     public bool RetainerHighlight { get; set; } = true;
     public bool ShowDtrCount { get; set; } = true;
     public bool ShowRetainerCount { get; set; } = true;

@@ -132,9 +132,15 @@ internal sealed unsafe class NativeReader : IDisposable
 
     public HashSet<uint>? BagItems()
     {
+        var contents = BagContents();
+        return contents == null ? null : BagMatchRules.ItemIds(contents.Select(x => (x.ItemId, x.Quantity)));
+    }
+
+    internal List<BagItem>? BagContents()
+    {
         var manager = InventoryManager.Instance();
         if (manager == null || Plugin.Objects.LocalPlayer == null) return null;
-        var slots = new List<(uint ItemId, uint Quantity)>();
+        var slots = new List<BagItem>();
         foreach (var type in new[] { InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4 })
         {
             var container = manager->GetInventoryContainer(type);
@@ -143,10 +149,11 @@ internal sealed unsafe class NativeReader : IDisposable
             for (var slot = 0; slot < container->Size; slot++)
             {
                 var item = container->Items[slot];
-                if (item.ItemId != 0 && item.Quantity > 0) slots.Add((item.ItemId, (uint)item.Quantity));
+                if (item.ItemId != 0 && item.Quantity > 0)
+                    slots.Add(new(item.ItemId, (uint)item.Quantity, (item.Flags & InventoryItem.ItemFlags.HighQuality) != 0));
             }
         }
-        return BagMatchRules.ItemIds(slots);
+        return slots;
     }
 
     public static bool RetainerListVisible()

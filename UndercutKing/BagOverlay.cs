@@ -13,6 +13,9 @@ internal sealed unsafe class BagOverlay : IDisposable
 {
     private readonly Plugin plugin;
     private DateTimeOffset nextError;
+    private HashSet<uint> mixedQualityTargets = [];
+    private DateTimeOffset nextQualityScan;
+    private ulong qualityCharacter;
     public BagOverlay(Plugin plugin) { this.plugin = plugin; Plugin.Interface.UiBuilder.Draw += Draw; }
 
     private static bool Visible(string name)
@@ -34,11 +37,27 @@ internal sealed unsafe class BagOverlay : IDisposable
 
     private void DrawFrames()
     {
+        var expanded = Visible("InventoryExpansion");
+        var character = Plugin.Player.ContentId;
+        if (character == 0 || !expanded && !Visible("Inventory") && !Visible("InventoryLarge"))
+        {
+            ClearQualityTargets();
+            return;
+        }
+        if (!plugin.Config.HighlightMixedQualities) ClearQualityTargets();
+        else if (character != qualityCharacter || DateTimeOffset.UtcNow >= nextQualityScan)
+        {
+            // Read all four physical bags, even if only one display page is open.
+            // Never reuse another character's contents or a partly loaded bag.
+            var contents = plugin.Reader.BagContents();
+            mixedQualityTargets = contents == null ? [] : MixedQualityRules.Targets(contents);
+            qualityCharacter = character;
+            nextQualityScan = DateTimeOffset.UtcNow.AddMilliseconds(250);
+        }
         var targets = BagOverlayRules.Targets(plugin.Active, Plugin.Player.ContentId, NativeReader.ActiveRetainer(),
             Visible("RetainerSellList"), plugin.Config.BagMatchHighlight, plugin.Config.HighlightMatchingBagSlots, plugin.BagItems);
+        targets.UnionWith(mixedQualityTargets);
         if (targets.Count == 0) return;
-        var expanded = Visible("InventoryExpansion");
-        if (!expanded && !Visible("Inventory") && !Visible("InventoryLarge")) return;
         var order = ItemOrderModule.Instance();
         var sorter = order == null ? null : order->InventorySorter;
         var manager = InventoryManager.Instance();
@@ -75,6 +94,13 @@ internal sealed unsafe class BagOverlay : IDisposable
                 draw.AddRect(min, max, ImGui.ColorConvertFloat4ToU32(new Vector4(.25f, .72f, 1f, 1f)), 4, ImDrawFlags.None, 2);
             }
         }
+    }
+
+    private void ClearQualityTargets()
+    {
+        mixedQualityTargets.Clear();
+        qualityCharacter = 0;
+        nextQualityScan = default;
     }
 
     private static bool NodeVisible(AtkResNode* node)

@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.14</Version>
+    <Version>0.1.0.15</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 修复召唤雇员后压价数量仍保留旧记录的问题，打开主菜单及返回雇员列表前刷新。
-- Fixed stale undercut counts after summoning a retainer; refresh when the menu opens and before returning to the retainer list.</Changelog>
+    <Changelog>- 增加背包 NQ/HQ 共存提示：同物品同时存在两种品质时，用蓝框标出对应格子。
+- Added blue bag-slot highlights for items present in both NQ and HQ quality.</Changelog>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
