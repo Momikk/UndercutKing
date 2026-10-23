@@ -16,6 +16,7 @@ internal sealed unsafe class BagOverlay : IDisposable
     private HashSet<uint> mixedQualityTargets = [];
     private DateTimeOffset nextQualityScan;
     private ulong qualityCharacter;
+    private readonly RecycleKingCompatibility recycleKing = new();
     public BagOverlay(Plugin plugin) { this.plugin = plugin; Plugin.Interface.UiBuilder.Draw += Draw; }
 
     private static bool Visible(string name)
@@ -57,6 +58,7 @@ internal sealed unsafe class BagOverlay : IDisposable
         var targets = BagOverlayRules.Targets(plugin.Active, Plugin.Player.ContentId, NativeReader.ActiveRetainer(),
             Visible("RetainerSellList"), plugin.Config.BagMatchHighlight, plugin.Config.HighlightMatchingBagSlots, plugin.BagItems);
         targets.UnionWith(mixedQualityTargets);
+        BagOverlayRules.ApplyRecyclePriority(targets, recycleKing.Targets());
         if (targets.Count == 0) return;
         var order = ItemOrderModule.Instance();
         var sorter = order == null ? null : order->InventorySorter;

@@ -11,4 +11,6 @@ public static class BagOverlayRules
     }
 
     public static bool ValidSource(int page, int slot) => page is >= 0 and < 4 && slot is >= 0 and < 35;
+    public static void ApplyRecyclePriority(HashSet<uint> blueTargets, IEnumerable<uint> pinkTargets)
+        => blueTargets.ExceptWith(pinkTargets);
 }

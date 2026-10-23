@@ -21,3 +21,5 @@
 2026-10-18，0.1.0.16：Momikk 将设置重构为独立实现的原生左侧分类窗口。原生组件使用 KamiToolKit（MidoriKami，MIT），采用套装之王中的 API 15 源码快照，依赖程序集独立命名为 UndercutKing.KamiToolKit。完整来源、修改和许可见 THIRD-PARTY-LICENSES.md 与 vendor/KamiToolKit/LICENSE。
 
 2026-10-18，0.1.0.17：Momikk 将原生设置改为顶部标签，修复 KamiToolKit CheckboxNode.DisableAutoResize 读取值与设置值相反造成的标签截断，扩大帮助按钮以容纳文字。
+
+2026-10-23，0.1.0.21：Momikk 增加可选的回收之王 IPC 兼容。背包蓝框排除正在使用粉色回收标记的物品；无对端或不可调用时保留原有行为。

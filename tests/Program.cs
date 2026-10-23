@@ -201,3 +201,12 @@ PriorityCheck("disabled price highlighting allows blue", HighlightStatus.Undercu
 PriorityCheck("disabled blue allows yellow", HighlightStatus.Unknown, true, true, false, HighlightStatus.Unknown);
 PriorityCheck("disabled colors stay normal", HighlightStatus.Undercut, true, false, false, HighlightStatus.Normal);
 Console.WriteLine($"PASS: {priorityChecks} shared highlight priority scenarios");
+var blueTargets = new HashSet<uint> { 42, 43 };
+BagOverlayRules.ApplyRecyclePriority(blueTargets, new uint[] { 42 });
+if (!blueTargets.SetEquals(new uint[] { 43 })) throw new Exception("Pink must remove only matching blue targets");
+BagOverlayRules.ApplyRecyclePriority(blueTargets, Array.Empty<uint>());
+if (!blueTargets.SetEquals(new uint[] { 43 })) throw new Exception("Absent RecycleKing must preserve blue");
+blueTargets = new HashSet<uint> { 42, 43 };
+BagOverlayRules.ApplyRecyclePriority(blueTargets, Array.Empty<uint>());
+if (!blueTargets.SetEquals(new uint[] { 42, 43 })) throw new Exception("Removing pink must allow freshly computed blue targets");
+Console.WriteLine("PASS: 3 cross-plugin pink-over-blue priority scenarios");

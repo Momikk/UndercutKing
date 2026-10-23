@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.21 — 2026-10-23
+
+- Skip blue bag highlights for items marked pink by RecycleKing; restore blue eligibility when the pink marker is removed.
+
 ## 0.1.0.20 — 2026-10-18
 
 - Removed the Common and Price Status tabs, keeping four settings categories and moving color samples to Retainer Highlights.
