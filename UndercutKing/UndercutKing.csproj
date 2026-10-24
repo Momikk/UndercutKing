@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.21</Version>
+    <Version>0.1.0.22</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,7 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>版本 0.1.0.21&#10;· 背包物品被回收之王标为粉色时，不再叠加蓝色高亮；取消粉色标记后恢复。&#10;English&#10;· Skip blue bag highlights for items marked pink by RecycleKing; restore blue eligibility when the pink marker is removed.</Changelog>
+    <Changelog>- 交换「市场数据」和「背包提示」标签的位置，默认打开市场数据。
+- Swapped the Market Data and Bag Highlights tabs; Market Data now opens by default.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

@@ -9,7 +9,7 @@ namespace UndercutKing;
 
 internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
 {
-    private static readonly string[] Pages = ["背包提示", "雇员提示", "市场数据", "后台限帧"];
+    private static readonly string[] Pages = ["市场数据", "雇员提示", "背包提示", "后台限帧"];
     private readonly List<NodeBase> owned = [];
     private readonly List<(CheckboxNode Node, Func<bool> Read)> checks = [];
     private readonly List<(NumericInputNode Node, Func<int> Read, Func<bool> Enabled)> numbers = [];
@@ -50,9 +50,9 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
             AddOwned(panel);
             panels.Add(panel);
         }
-        BuildBags(panels[0]);
+        BuildMarket(panels[0]);
         BuildRetainers(panels[1]);
-        BuildMarket(panels[2]);
+        BuildBags(panels[2]);
         BuildPerformance(panels[3]);
         Select(selected);
         SyncControls();
@@ -303,7 +303,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     }
     private void RefreshStatus()
     {
-        if (network != null && selected == 2)
+        if (network != null && selected == 0)
         {
             var state = string.Join("\n", new[] { plugin.Prices.NetworkStatus,
                 plugin.Prices.PushError, plugin.Prices.LastError, plugin.Reader.Error }.Where(x => x.Length != 0));
