@@ -58,7 +58,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         Config.BackgroundFps = FramePacer.ClampFps(Config.BackgroundFps);
         if (!Enum.IsDefined(Config.HighlightTheme)) Config.HighlightTheme = HighlightTheme.Auto;
         Prices = new();
-        Reader = new(Prices);
+        Reader = new(Prices, Config);
         highlighter = new(this);
         dtrCounter = new(this, Open);
         Reader.SnapshotReady += MenuSnapshot;
@@ -116,7 +116,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     internal void Refresh()
     {
         foreach (var snapshot in Config.Retainers.Where(x => x.CharacterId == Player.ContentId))
-            foreach (var item in snapshot.Listings.Select(x => x.ItemId).Distinct())
+            foreach (var item in snapshot.Listings.Where(x => x.IsForSale).Select(x => x.ItemId).Distinct())
                 Prices.Queue(snapshot.WorldId, item, true, Config.AutomaticRefreshMinutes);
     }
 
@@ -146,10 +146,10 @@ public sealed class Plugin : IAsyncDalamudPlugin
                 ? Reader.BagItems() ?? new HashSet<uint>() : new HashSet<uint>();
             if (captured != null) StoreSnapshot(captured);
             Prices.Watch(Config.Retainers.Where(x => x.CharacterId == id)
-                .SelectMany(x => x.Listings.Select(item => (x.WorldId, item.ItemId))), Config.AutomaticPriceCheck && Config.UseMarketPush, Config.AutomaticPriceCheck);
+                .SelectMany(x => x.Listings.Where(item => item.IsForSale).Select(item => (x.WorldId, item.ItemId))), Config.AutomaticPriceCheck && Config.UseMarketPush, Config.AutomaticPriceCheck);
             if (Config.AutomaticPriceCheck)
                 foreach (var snapshot in Config.Retainers.Where(x => x.CharacterId == id))
-                    foreach (var item in snapshot.Listings.Select(x => x.ItemId).Distinct())
+                    foreach (var item in snapshot.Listings.Where(x => x.IsForSale).Select(x => x.ItemId).Distinct())
                         Prices.Queue(snapshot.WorldId, item, false, Prices.PushConnected ? Config.AutomaticRefreshMinutes : Math.Min(5, Config.AutomaticRefreshMinutes));
             if (dirty && DateTimeOffset.UtcNow >= nextSave)
             {

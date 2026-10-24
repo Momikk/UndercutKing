@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.22</Version>
+    <Version>0.1.0.23</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 交换「市场数据」和「背包提示」标签的位置，默认打开市场数据。
-- Swapped the Market Data and Bag Highlights tabs; Market Data now opens by default.</Changelog>
+    <Changelog>- 服装模特展示非卖品不再查询价格、参与压价计数或高亮；更新后打开一次雇员出售列表识别。
+- Exclude mannequin display-only items from price queries, undercut counts, and highlights; open the retainer sale list once after updating to identify them.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

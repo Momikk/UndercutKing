@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.23 — 2026-10-25
+
+- Exclude mannequin display-only items from price queries, undercut counts, and highlights; open the retainer sale list once after updating to identify them.
+
 ## 0.1.0.22 — 2026-10-24
 
 - Swapped the Market Data and Bag Highlights tabs; Market Data now opens by default.

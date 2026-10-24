@@ -2,7 +2,20 @@ namespace UndercutKing;
 
 public enum HighlightStatus { Normal, Undercut, Unknown, BagMatch }
 
-public sealed record Listing(int Slot, int MenuIndex, uint ItemId, bool Hq, uint Quantity, uint Price);
+public sealed record Listing(int Slot, int MenuIndex, uint ItemId, bool Hq, uint Quantity, uint Price)
+{
+    // Null is an older/unconfirmed snapshot, not evidence of a display-only slot.
+    public bool? ForSale { get; init; }
+    public bool IsForSale => ForSale != false;
+}
+
+public static class ListingEligibility
+{
+    public static Listing Preserve(Listing current, Listing? previous) => current.ForSale == null &&
+        previous != null && current.Slot == previous.Slot && current.ItemId == previous.ItemId &&
+        current.Hq == previous.Hq && current.Quantity == previous.Quantity && current.Price == previous.Price
+        ? current with { ForSale = previous.ForSale } : current;
+}
 public sealed class RetainerSnapshot
 {
     public ulong CharacterId { get; set; }
@@ -23,6 +36,7 @@ public static class PriceRules
     // NQ and HQ share one minimum for the same item. Equal prices are competitive.
     public static HighlightStatus Evaluate(Listing listing, MarketQuote? quote, DateTimeOffset now, int minutes)
     {
+        if (!listing.IsForSale) return HighlightStatus.Normal;
         if (listing.Price == 0 || quote == null || now - quote.ObservedAt > TimeSpan.FromMinutes(minutes))
             return HighlightStatus.Unknown;
         var lowest = quote.Lowest;

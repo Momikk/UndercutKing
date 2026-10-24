@@ -7,7 +7,7 @@ public static class BagOverlayRules
     {
         if (!salesVisible || !blueEnabled || !mirrorEnabled || character == 0 || activeRetainer == 0 ||
             snapshot == null || snapshot.CharacterId != character || snapshot.RetainerId != activeRetainer) return [];
-        return snapshot.Listings.Where(x => bagItems.Contains(x.ItemId)).Select(x => x.ItemId).ToHashSet();
+        return snapshot.Listings.Where(x => x.IsForSale && bagItems.Contains(x.ItemId)).Select(x => x.ItemId).ToHashSet();
     }
 
     public static bool ValidSource(int page, int slot) => page is >= 0 and < 4 && slot is >= 0 and < 35;

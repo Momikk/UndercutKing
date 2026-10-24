@@ -23,3 +23,5 @@
 2026-10-18，0.1.0.17：Momikk 将原生设置改为顶部标签，修复 KamiToolKit CheckboxNode.DisableAutoResize 读取值与设置值相反造成的标签截断，扩大帮助按钮以容纳文字。
 
 2026-10-23，0.1.0.21：Momikk 增加可选的回收之王 IPC 兼容。背包蓝框排除正在使用粉色回收标记的物品；无对端或不可调用时保留原有行为。
+
+2026-10-25，0.1.0.23：Momikk 新增非卖品状态保存与过滤。出售列表每行第 7 项是否出售标记的识别参考 NightshadeNx 提交的 Allagan Market PR #42（提交 8a4b386eab0df2f435b55fbd2ae6d48836ae59ed，https://github.com/Critical-Impact/AllaganMarket/pull/42），沿用 AGPL-3.0-or-later。未采用其 0/1 金币价格推断，避免排除正常低价商品。

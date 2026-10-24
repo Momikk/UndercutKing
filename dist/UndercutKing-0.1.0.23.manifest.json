@@ -1,0 +1,29 @@
+{
+  "Author": "Momikk",
+  "Name": "压价之王 UndercutKing",
+  "InternalName": "UndercutKing",
+  "AssemblyVersion": "0.1.0.23",
+  "Description": "轻量雇员市场辅助：比对市场价格，在雇员销售列表与雇员列表中高亮被压价的物品。仅提供提示，不自动改价。由 Momikk 维护，部分库存与界面交互代码改编自 Critical_Impact 的 Allagan Market，采用 AGPL-3.0-or-later。",
+  "ApplicableVersion": "any",
+  "RepoUrl": "https://github.com/Momikk/UndercutKing",
+  "Tags": [
+    "market",
+    "retainer",
+    "undercut"
+  ],
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": true,
+  "LoadPriority": 0,
+  "IconUrl": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png",
+  "Punchline": "高亮被压价的雇员物品，改价后及时更新。",
+  "Changelog": "- 服装模特展示非卖品不再查询价格、参与压价计数或高亮；更新后打开一次雇员出售列表识别。\r\n- Exclude mannequin display-only items from price queries, undercut counts, and highlights; open the retainer sale list once after updating to identify them.",
+  "AcceptsFeedback": true,
+  "DownloadLinkInstall": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/dist/UndercutKing-0.1.0.23.zip",
+  "DownloadLinkUpdate": "https://raw.githubusercontent.com/Momikk/UndercutKing/main/dist/UndercutKing-0.1.0.23.zip",
+  "DownloadCount": 0,
+  "IsHide": false,
+  "IsTestingExclusive": false,
+  "LastUpdate": 1792858720
+}

@@ -22,15 +22,17 @@ internal sealed unsafe class NativeReader : IDisposable
     private delegate void* ContainerPacket(int sequence, int* packet);
     private delegate void MarketPacket(uint sequence, nint packet);
     private readonly MarketPrices prices;
+    private readonly Configuration config;
     private readonly RetainerLoadState loadState = new();
     public bool InventoryHookReady => inventoryHook?.IsEnabled == true;
     public bool MarketHookReady => marketHook?.IsEnabled == true;
     public string Error { get; private set; } = "";
     internal event Action<RetainerSnapshot>? SnapshotReady;
 
-    public NativeReader(MarketPrices prices)
+    public NativeReader(MarketPrices prices, Configuration config)
     {
         this.prices = prices;
+        this.config = config;
         try
         {
             Plugin.Interop.InitializeFromAttributes(this);
@@ -184,18 +186,51 @@ internal sealed unsafe class NativeReader : IDisposable
             Name = Owners().FirstOrDefault(x => x.Id == id).Name ?? "雇员",
             CapturedAt = DateTimeOffset.UtcNow,
         };
+        var availability = SaleFlags();
+        var previous = config.Retainers.Where(x => x.CharacterId == characterId && x.RetainerId == id)
+            .MaxBy(x => x.CapturedAt);
         for (short slot = 0; slot < 20; slot++)
         {
             var item = container->Items[slot];
             if (item.ItemId == 0) continue;
             if (item.Quantity <= 0) return null;
             var price = manager->GetRetainerMarketPrice(slot);
-            if (price == 0 || price > uint.MaxValue) return null; // wait for the price packet, never replace a known price with zero
-            result.Listings.Add(new(slot, -1, item.ItemId, (item.Flags & InventoryItem.ItemFlags.HighQuality) != 0,
-                (uint)item.Quantity, (uint)price));
+            if (price > uint.MaxValue) return null;
+            var listing = new Listing(slot, -1, item.ItemId, (item.Flags & InventoryItem.ItemFlags.HighQuality) != 0,
+                (uint)item.Quantity, (uint)price) { ForSale = availability.GetValueOrDefault(slot) };
+            listing = ListingEligibility.Preserve(listing, previous?.Listings.FirstOrDefault(x => x.Slot == slot));
+            // A confirmed non-sale slot need not have a usable price; it must not
+            // prevent the remaining genuine listings from being refreshed.
+            if (price == 0 && listing.IsForSale) return null;
+            result.Listings.Add(listing);
         }
         if (saleVisible && ForSaleList(result) == null) return null; // incomplete UI rebuild
         return result;
+    }
+
+    // Row flag offset researched by NightshadeNx in AllaganMarket PR #42.
+    // Read the game's flag, not a one-gil price heuristic.
+    private static Dictionary<int, bool?> SaleFlags()
+    {
+        var flags = new Dictionary<int, bool?>();
+        var reference = Plugin.GameGui.GetAddonByName("RetainerSellList");
+        if (reference.IsNull || !reference.IsReady || !reference.IsVisible) return flags;
+        var addon = (AtkUnitBase*)reference.Address;
+        if (addon->AtkValues == null) return flags;
+        for (var row = 0; row < 20; row++)
+        {
+            var index = 15 + row * 13;
+            if (index + 7 >= addon->AtkValuesCount) break;
+            var slot = addon->AtkValues[index];
+            var flag = addon->AtkValues[index + 7];
+            if (slot.Type == 0 || slot.Int is < 0 or >= 20) continue;
+            if (flag.Type == FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Bool)
+                flags.TryAdd(slot.Int, flag.Bool);
+            else if ((flag.Type == FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int ||
+                      flag.Type == FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.UInt) && flag.UInt <= 1)
+                flags.TryAdd(slot.Int, flag.UInt != 0);
+        }
+        return flags;
     }
 
     private static bool Visible(string name)
