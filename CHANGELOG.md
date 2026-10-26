@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.24 — 2026-10-26
+
+- Changed highlight priority: blue first, then red, then yellow.
+
 ## 0.1.0.23 — 2026-10-25
 
 - Exclude mannequin display-only items from price queries, undercut counts, and highlights; open the retainer sale list once after updating to identify them.

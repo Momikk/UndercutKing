@@ -140,7 +140,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     private void BuildLegend(ResNode panel, float y)
     {
         (string Label, HighlightStatus Status)[] samples =
-            [("红色：被压价", HighlightStatus.Undercut), ("蓝色：同物品", HighlightStatus.BagMatch), ("黄色：待更新", HighlightStatus.Unknown)];
+            [("蓝色：同物品", HighlightStatus.BagMatch), ("红色：被压价", HighlightStatus.Undercut), ("黄色：待更新", HighlightStatus.Unknown)];
         for (var i = 0; i < samples.Length; i++)
         {
             var node = new TextNode
@@ -181,7 +181,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         ItemCheck(panel, 32);
         Check(panel, "高亮被压价的雇员", 62, () => plugin.Config.RetainerHighlight,
             value => plugin.Config.RetainerHighlight = value,
-            "颜色优先级：红色（被压价）> 蓝色（背包同物品）> 黄色（报价待确认）。");
+            "颜色优先级：蓝色（背包同物品）> 红色（被压价）> 黄色（报价待确认）。");
         Group(panel, "压价数量", 102);
         Check(panel, "雇员列表显示压价数量", 134, () => plugin.Config.ShowRetainerCount,
             value => plugin.Config.ShowRetainerCount = value,

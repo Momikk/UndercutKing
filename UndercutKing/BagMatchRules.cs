@@ -23,7 +23,6 @@ public static class BagMatchRules
 
     public static HighlightStatus Prioritize(HighlightStatus priceStatus, bool bagMatch, bool priceHighlight, bool bagHighlight)
     {
-        if (priceHighlight && priceStatus == HighlightStatus.Undercut) return HighlightStatus.Undercut;
         if (bagHighlight && bagMatch) return HighlightStatus.BagMatch;
         return priceHighlight ? priceStatus : HighlightStatus.Normal;
     }
