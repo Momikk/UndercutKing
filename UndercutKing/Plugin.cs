@@ -19,6 +19,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     [PluginService] internal static IPlayerState Player { get; private set; } = null!;
     [PluginService] internal static IAddonLifecycle Addons { get; private set; } = null!;
     [PluginService] internal static IMarketBoard MarketBoard { get; private set; } = null!;
+    [PluginService] internal static ICondition Conditions { get; private set; } = null!;
     [PluginService] internal static IDataManager Data { get; private set; } = null!;
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     public Configuration Config { get; }
@@ -29,6 +30,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     private readonly Highlighter highlighter;
     private readonly BagOverlay bagOverlay;
     private readonly BackgroundFrameLimiter backgroundFrameLimiter;
+    private readonly MarketSearchRecovery marketSearchRecovery;
     private NativeSettingsWindow? main;
     private bool nativeUiReady;
     private readonly DtrCounter dtrCounter;
@@ -59,6 +61,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         if (!Enum.IsDefined(Config.HighlightTheme)) Config.HighlightTheme = HighlightTheme.Auto;
         Prices = new();
         Reader = new(Prices, Config);
+        marketSearchRecovery = new(Config, Reader);
         highlighter = new(this);
         dtrCounter = new(this, Open);
         Reader.SnapshotReady += MenuSnapshot;
@@ -175,6 +178,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
             Framework.Update -= Tick;
             Reader.SnapshotReady -= MenuSnapshot;
             backgroundFrameLimiter.Dispose();
+            marketSearchRecovery.Dispose();
             MarketBoard.OfferingsReceived -= Receive;
             dtrCounter.Dispose();
             bagOverlay.Dispose();

@@ -230,7 +230,10 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
         new TextButtonNode { String = "刷新报价", Position = new(0, 216), Size = new(112, 28),
             TextTooltip = "刷新已扫描雇员的市场报价，遵守请求队列和限流等待。",
             OnClick = plugin.Refresh }.AttachNode(panel);
-        network = Text(panel, "", 254, 58, true);
+        Check(panel, "市场查询卡住时自动重试", 252, () => plugin.Config.AutoRetryMarketSearch,
+            value => plugin.Config.AutoRetryMarketSearch = value,
+            "游戏市场明确拒绝查询时，等待 1、2、4 秒最多重试三次；关闭窗口或切换物品后取消。空市场不重试。DR 已加载时不接管；不增加 Universalis 请求。");
+        network = Text(panel, "", 286, 44, true);
         dropdown.AttachNode(panel); // popup stays above numeric controls and the refresh button
     }
     private void BuildPerformance(ResNode panel)

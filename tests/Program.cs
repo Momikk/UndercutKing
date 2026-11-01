@@ -5,6 +5,7 @@ FramePacerRegression.Run();
 RetainerCaptureRegression.Run();
 MixedQualityRegression.Run();
 NonSaleRegression.Run();
+MarketSearchRetryRegression.Run();
 
 var now = DateTimeOffset.UtcNow;
 var listed = new Listing(0, 0, 100, false, 1, 1000);

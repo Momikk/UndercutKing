@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.0.25 — 2026-11-01
+
+- Retry rejected market searches automatically; stand down while Daily Routines is loaded.
+
 ## 0.1.0.24 — 2026-10-26
 
 - Changed highlight priority: blue first, then red, then yellow.

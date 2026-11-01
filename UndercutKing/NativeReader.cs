@@ -7,6 +7,7 @@ using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using GameFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 namespace UndercutKing;
@@ -28,6 +29,7 @@ internal sealed unsafe class NativeReader : IDisposable
     public bool MarketHookReady => marketHook?.IsEnabled == true;
     public string Error { get; private set; } = "";
     internal event Action<RetainerSnapshot>? SnapshotReady;
+    internal event Action<uint, uint, uint>? MarketResult;
 
     public NativeReader(MarketPrices prices, Configuration config)
     {
@@ -104,18 +106,26 @@ internal sealed unsafe class NativeReader : IDisposable
 
     private void MarketRequest(uint sequence, nint packet)
     {
+        uint status = 0, count = 0, itemId = 0;
+        var observed = false;
         try
         {
             if (packet != 0 && Plugin.Objects.LocalPlayer is { } player)
             {
                 var manager = InventoryManager.Instance();
                 var selected = manager == null || ActiveRetainer() == 0 ? null : manager->GetInventorySlot(InventoryType.BlockedItems, 0);
-                prices.Begin((uint)Marshal.ReadInt32(packet), (uint)Marshal.ReadInt32(packet, 4),
+                status = (uint)Marshal.ReadInt32(packet);
+                count = (uint)Marshal.ReadInt32(packet, 4);
+                var search = InfoProxyItemSearch.Instance();
+                itemId = search == null ? 0 : search->SearchItemId;
+                observed = true;
+                prices.Begin(status, count,
                     player.CurrentWorld.RowId, selected == null ? 0 : selected->ItemId);
             }
         }
         catch (Exception ex) { Plugin.Log.Error(ex, "Could not observe market request"); }
         marketHook!.OriginalDisposeSafe(sequence, packet);
+        if (observed) MarketResult?.Invoke(status, count, itemId);
     }
 
     public List<(ulong Id, string Name)> Owners()

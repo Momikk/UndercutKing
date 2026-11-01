@@ -14,6 +14,7 @@ public sealed class Configuration : IPluginConfiguration
     public bool ShowRetainerCount { get; set; } = true;
     public bool AutomaticPriceCheck { get; set; } = true;
     public bool UseMarketPush { get; set; } = true;
+    public bool AutoRetryMarketSearch { get; set; } = true;
     public bool LimitBackgroundFps { get; set; } = true;
     public int BackgroundFps { get; set; } = 20;
     public int AutomaticRefreshMinutes { get; set; } = 15;

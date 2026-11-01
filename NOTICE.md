@@ -25,3 +25,5 @@
 2026-10-23，0.1.0.21：Momikk 增加可选的回收之王 IPC 兼容。背包蓝框排除正在使用粉色回收标记的物品；无对端或不可调用时保留原有行为。
 
 2026-10-25，0.1.0.23：Momikk 新增非卖品状态保存与过滤。出售列表每行第 7 项是否出售标记的识别参考 NightshadeNx 提交的 Allagan Market PR #42（提交 8a4b386eab0df2f435b55fbd2ae6d48836ae59ed，https://github.com/Critical-Impact/AllaganMarket/pull/42），沿用 AGPL-3.0-or-later。未采用其 0/1 金币价格推断，避免排除正常低价商品。
+
+2026-11-01，0.1.0.25：Momikk 参考 DailyRoutines.ModulesPublic 的 System/AutoRefreshMarketSearchResult.cs（Dalamud-DailyRoutines，AGPL-3.0，https://github.com/Dalamud-DailyRoutines/DailyRoutines.ModulesPublic/blob/4c56b564fb33b9ac8557e52f76c4ca60f706a8f3/System/AutoRefreshMarketSearchResult.cs）与 AtmoOmen/OmenTools 的 GameState.Internal.cs（https://github.com/AtmoOmen/OmenTools/blob/46d0a2e16c71460759b8a226fd4aa08081942148/OmenService/Implementations/Infos/GameState.Internal.cs）研究明确错误后的 RequestData 重试方式。复用本插件已有市场包观察，不复制等待文字内存补丁或增加 OmenTools 依赖；独立实现有限次数退避、上下文取消及 DR 避让。错误码 0x70000003 的含义参考 Dalamud MarketBoardItemRequest 源码。
