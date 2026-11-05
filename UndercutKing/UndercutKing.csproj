@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.0.25</Version>
+    <Version>0.1.0.26</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 增加市场查询自动重试：查询卡住时尝试重新加载，DR 已加载时不重复接管。
-- Retry rejected market searches automatically; stand down while Daily Routines is loaded.</Changelog>
+    <Changelog>- 市场查询自动重试不再检测 DR，DR 已加载时也继续工作。
+- Keep market search retries active regardless of whether Daily Routines is loaded.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

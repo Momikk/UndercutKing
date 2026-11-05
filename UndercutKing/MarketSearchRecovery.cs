@@ -31,7 +31,6 @@ internal sealed unsafe class MarketSearchRecovery : IDisposable
     private bool Eligible(uint item) => config.AutoRetryMarketSearch && reader.MarketHookReady &&
         Plugin.Player.ContentId != 0 && !Plugin.Conditions[ConditionFlag.OnFreeTrial] &&
         !Plugin.Conditions[ConditionFlag.BoundByDuty] &&
-        !Plugin.Interface.InstalledPlugins.Any(p => p.InternalName == "DailyRoutines" && p.IsLoaded) &&
         Plugin.Data.GetExcelSheet<Item>().GetRowOrDefault(item) is { } row && row.ItemSearchCategory.RowId > 0;
 
     private void Observe(uint status, uint count, uint item)
