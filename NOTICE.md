@@ -28,4 +28,4 @@
 
 2026-11-01，0.1.0.25：Momikk 参考 DailyRoutines.ModulesPublic 的 System/AutoRefreshMarketSearchResult.cs（Dalamud-DailyRoutines，AGPL-3.0，https://github.com/Dalamud-DailyRoutines/DailyRoutines.ModulesPublic/blob/4c56b564fb33b9ac8557e52f76c4ca60f706a8f3/System/AutoRefreshMarketSearchResult.cs）与 AtmoOmen/OmenTools 的 GameState.Internal.cs（https://github.com/AtmoOmen/OmenTools/blob/46d0a2e16c71460759b8a226fd4aa08081942148/OmenService/Implementations/Infos/GameState.Internal.cs）研究明确错误后的 RequestData 重试方式。复用本插件已有市场包观察，不复制等待文字内存补丁或增加 OmenTools 依赖；独立实现有限次数退避、上下文取消及 DR 避让。错误码 0x70000003 的含义参考 Dalamud MarketBoardItemRequest 源码。
 
-2026-11-10，0.1.0.27：移除失效的库存容器 Hook，雇员实时读取使用已有菜单生命周期确认当前雇员后读取已加载库存；保留市场响应 Hook、出售顺序映射及有效性校验。
+2026-11-10，0.1.1.0：移除失效的库存容器 Hook，雇员实时读取使用已有菜单生命周期确认当前雇员后读取已加载库存；保留市场响应 Hook、出售顺序映射及有效性校验。
