@@ -14,18 +14,13 @@ namespace UndercutKing;
 
 internal sealed unsafe class NativeReader : IDisposable
 {
-    internal const string InventorySignature = "48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 44 0F B7 42 ??";
     internal const string MarketSignature = "48 89 5C 24 ?? 57 48 83 EC 20 48 8B 0D ?? ?? ?? ?? 48 8B DA E8 ?? ?? ?? ??";
-    [Signature(InventorySignature, DetourName = nameof(ContainerInfo), UseFlags = SignatureUseFlags.Hook)]
-    private Hook<ContainerPacket>? inventoryHook = null;
     [Signature(MarketSignature, DetourName = nameof(MarketRequest), UseFlags = SignatureUseFlags.Hook)]
     private Hook<MarketPacket>? marketHook = null;
-    private delegate void* ContainerPacket(int sequence, int* packet);
     private delegate void MarketPacket(uint sequence, nint packet);
     private readonly MarketPrices prices;
     private readonly Configuration config;
     private readonly RetainerLoadState loadState = new();
-    public bool InventoryHookReady => inventoryHook?.IsEnabled == true;
     public bool MarketHookReady => marketHook?.IsEnabled == true;
     public string Error { get; private set; } = "";
     internal event Action<RetainerSnapshot>? SnapshotReady;
@@ -38,15 +33,13 @@ internal sealed unsafe class NativeReader : IDisposable
         try
         {
             Plugin.Interop.InitializeFromAttributes(this);
-            inventoryHook?.Enable();
             marketHook?.Enable();
-            if (!InventoryHookReady) Error = "库存签名不可用，请等待适配当前游戏版本。";
+            if (!MarketHookReady) Error = "市场签名不可用，游戏内报价和查询重试暂停。";
         }
         catch (Exception ex)
         {
             Error = "游戏交互初始化失败，请查看 /xllog。";
             Plugin.Log.Error(ex, "UndercutKing native hooks initialization failed");
-            inventoryHook?.Disable();
             marketHook?.Disable();
         }
         foreach (var type in MenuEvents) Plugin.Addons.RegisterListener(type, "SelectString", MenuChanged);
@@ -80,28 +73,6 @@ internal sealed unsafe class NativeReader : IDisposable
         if (framework == null || framework->UIModule == null) return 0;
         var order = framework->UIModule->GetItemOrderModule();
         return order == null ? 0 : order->ActiveRetainerId;
-    }
-
-    private void* ContainerInfo(int sequence, int* packet)
-    {
-        // Read the packet while its caller still owns the buffer, then let the game finish
-        // receiving it before permitting a snapshot. Call Original exactly once.
-        var retainer = 0UL;
-        try
-        {
-            loadState.Observe(ActiveRetainer());
-            if (packet != null)
-            {
-                var payload = (byte*)packet + 16;
-                var container = *(uint*)(payload + 8);
-                if (container == (uint)InventoryType.RetainerMarket)
-                    retainer = ActiveRetainer();
-            }
-        }
-        catch (Exception ex) { Plugin.Log.Error(ex, "Could not observe retainer inventory packet"); }
-        var result = inventoryHook!.Original(sequence, packet);
-        if (retainer != 0 && retainer == ActiveRetainer()) loadState.Received(retainer);
-        return result;
     }
 
     private void MarketRequest(uint sequence, nint packet)
@@ -183,7 +154,7 @@ internal sealed unsafe class NativeReader : IDisposable
         if (menuVisible) loadState.MenuReady(id);
         // A retainer change invalidates loading even if the old container still looks populated.
         var ready = loadState.Ready(id);
-        if (!InventoryHookReady || !ready || Plugin.Objects.LocalPlayer is not { } player) return null;
+        if (!ready || Plugin.Objects.LocalPlayer is not { } player) return null;
         var saleVisible = Visible("RetainerSellList");
         if (!saleVisible && !menuVisible && !menuTransition) return null;
         var manager = InventoryManager.Instance();
@@ -270,9 +241,7 @@ internal sealed unsafe class NativeReader : IDisposable
     public void Dispose()
     {
         foreach (var type in MenuEvents) Plugin.Addons.UnregisterListener(type, "SelectString", MenuChanged);
-        inventoryHook?.Disable();
         marketHook?.Disable();
-        inventoryHook?.Dispose();
         marketHook?.Dispose();
     }
 }

@@ -73,7 +73,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         MarketBoard.OfferingsReceived += Receive;
         Framework.Update += Tick;
         backgroundFrameLimiter = new(Config);
-        Log.Information("UndercutKing loaded: inventory hook={Inventory}, market hook={Market}", Reader.InventoryHookReady, Reader.MarketHookReady);
+        Log.Information("UndercutKing loaded: menu-based retainer capture, market hook={Market}", Reader.MarketHookReady);
     }
 
     public async Task LoadAsync(CancellationToken cancellationToken)
