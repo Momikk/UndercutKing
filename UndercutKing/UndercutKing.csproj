@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.1.0</Version>
+    <Version>0.1.1.1</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,8 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 适配7.58版本更新
-- Update for patch 7.58.</Changelog>
+    <Changelog>- 与其他卖家的最低价相同也标记为被压价。
+- Mark listings priced at the lowest competing price as undercut.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

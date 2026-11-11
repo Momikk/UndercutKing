@@ -155,7 +155,7 @@ internal sealed unsafe class NativeSettingsWindow(Plugin plugin) : NativeAddon
     }
     private void ItemCheck(ResNode panel, float y) => Check(panel, "高亮被压价的物品", y,
         () => plugin.Config.ItemHighlight, value => plugin.Config.ItemHighlight = value,
-        "红色表示售价高于市场最低价，黄色表示报价未知或过期。NQ/HQ 共用最低价，仅提示，不自动改价。");
+        "红色表示售价等于或高于其他卖家的最低价，黄色表示报价未知或过期。NQ/HQ 共用最低价，仅提示，不自动改价。");
     private void MixedCheck(ResNode panel, float y) => Check(panel, "同物品同时有 NQ 和 HQ", y,
         () => plugin.Config.HighlightMixedQualities, value => plugin.Config.HighlightMixedQualities = value,
         "普通背包里同物品同时有 NQ 和 HQ 时，用蓝框标出两种品质的所有格子，无需召唤雇员。");

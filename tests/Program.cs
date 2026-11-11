@@ -18,7 +18,7 @@ void Check(string scenario, HighlightStatus actual, HighlightStatus expected)
 }
 Check("initial undercut", PriceRules.Evaluate(listed, market, now, 15), HighlightStatus.Undercut);
 Check("lowering price clears highlight", PriceRules.Evaluate(listed with { Price = 899 }, market, now, 15), HighlightStatus.Normal);
-Check("equal price is competitive", PriceRules.Evaluate(listed with { Price = 900 }, market, now, 15), HighlightStatus.Normal);
+Check("equal price is marked as undercut", PriceRules.Evaluate(listed with { Price = 900 }, market, now, 15), HighlightStatus.Undercut);
 Check("fresh market rise clears highlight", PriceRules.Evaluate(listed, market with { Nq = 1100 }, now, 15), HighlightStatus.Normal);
 Check("HQ compares with cheaper NQ", PriceRules.Evaluate(listed with { Hq = true }, market, now, 15), HighlightStatus.Undercut);
 Check("NQ compares with cheaper HQ", PriceRules.Evaluate(listed, market with { Nq = 1500, Hq = 900 }, now, 15), HighlightStatus.Undercut);
@@ -79,7 +79,7 @@ void RetainerCheck(string scenario, bool passes)
 }
 var retainerSnapshots = new List<RetainerSnapshot>
 {
-    new() { CharacterId = 1, RetainerId = 10, CapturedAt = now, Listings = [listed with { Quantity = 99 }, listed with { Slot = 1, Price = 900 }] },
+    new() { CharacterId = 1, RetainerId = 10, CapturedAt = now, Listings = [listed with { Quantity = 99 }, listed with { Slot = 1, Price = 899 }] },
     new() { CharacterId = 1, RetainerId = 11, CapturedAt = now, Listings = [listed, listed with { Slot = 1 }] },
     new() { CharacterId = 2, RetainerId = 10, CapturedAt = now, Listings = [listed, listed with { Slot = 1 }] },
     new() { CharacterId = 1, RetainerId = 10, CapturedAt = now.AddDays(-1), Listings = [listed, listed with { Slot = 1 }] },

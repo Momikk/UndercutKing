@@ -41,7 +41,7 @@ public static class PriceRules
             return HighlightStatus.Unknown;
         var lowest = quote.Lowest;
         if (lowest == null) return quote.Complete ? HighlightStatus.Normal : HighlightStatus.Unknown;
-        return listing.Price > lowest ? HighlightStatus.Undercut : HighlightStatus.Normal;
+        return listing.Price >= lowest ? HighlightStatus.Undercut : HighlightStatus.Normal;
     }
 }
 

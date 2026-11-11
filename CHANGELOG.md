@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.1.1 — 2026-11-11
+
+- Mark listings priced at the lowest competing price as undercut.
+
 ## 0.1.1.0 — 2026-11-10
 
 - Update for patch 7.58.
