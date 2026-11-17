@@ -17,6 +17,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     [PluginService] internal static IGameInteropProvider Interop { get; private set; } = null!;
     [PluginService] internal static IObjectTable Objects { get; private set; } = null!;
     [PluginService] internal static IPlayerState Player { get; private set; } = null!;
+    [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] internal static IAddonLifecycle Addons { get; private set; } = null!;
     [PluginService] internal static IMarketBoard MarketBoard { get; private set; } = null!;
     [PluginService] internal static ICondition Conditions { get; private set; } = null!;
@@ -34,6 +35,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     private NativeSettingsWindow? main;
     private bool nativeUiReady;
     private readonly DtrCounter dtrCounter;
+    private readonly UndercutIpc ipc;
     private DateTimeOffset nextTick;
     private DateTimeOffset nextSave;
     private ulong characterId;
@@ -71,6 +73,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         Interface.UiBuilder.OpenMainUi += Open;
         Interface.UiBuilder.OpenConfigUi += Open;
         MarketBoard.OfferingsReceived += Receive;
+        ipc = new(this);
         Framework.Update += Tick;
         backgroundFrameLimiter = new(Config);
         Log.Information("UndercutKing loaded: menu-based retainer capture, market hook={Market}", Reader.MarketHookReady);
@@ -133,13 +136,14 @@ public sealed class Plugin : IAsyncDalamudPlugin
             var id = Player.ContentId;
             if (id != characterId)
             {
+                ipc.Clear();
                 highlighter.Restore();
                 Reader.Reset();
                 Active = null;
                 BagItems = new HashSet<uint>();
                 characterId = id;
             }
-            if (id == 0) { Active = null; Prices.Watch([], false); dtrCounter.Update(); return; }
+            if (id == 0) { ipc.Clear(); Active = null; Prices.Watch([], false); dtrCounter.Update(); return; }
             var owners = Reader.Owners();
             Prices.SetOwners(owners.Select(x => x.Id).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.RetainerId)),
                 owners.Select(x => x.Name).Concat(Config.Retainers.Where(x => x.CharacterId == id).Select(x => x.Name)));
@@ -150,6 +154,8 @@ public sealed class Plugin : IAsyncDalamudPlugin
             if (captured != null) StoreSnapshot(captured);
             Prices.Watch(Config.Retainers.Where(x => x.CharacterId == id)
                 .SelectMany(x => x.Listings.Where(item => item.IsForSale).Select(item => (x.WorldId, item.ItemId))), Config.AutomaticPriceCheck && Config.UseMarketPush, Config.AutomaticPriceCheck);
+            ipc.Publish(id, owners);
+            if (ipc.TakeRefresh(id)) Refresh();
             if (Config.AutomaticPriceCheck)
                 foreach (var snapshot in Config.Retainers.Where(x => x.CharacterId == id))
                     foreach (var item in snapshot.Listings.Where(x => x.IsForSale).Select(x => x.ItemId).Distinct())
@@ -163,6 +169,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         }
         catch (Exception ex)
         {
+            ipc.Clear();
             Active = null;
             BagItems = new HashSet<uint>();
             nextTick = DateTimeOffset.UtcNow.AddSeconds(10);
@@ -176,6 +183,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         await Framework.Run(() =>
         {
             Framework.Update -= Tick;
+            ipc.Dispose();
             Reader.SnapshotReady -= MenuSnapshot;
             backgroundFrameLimiter.Dispose();
             marketSearchRecovery.Dispose();

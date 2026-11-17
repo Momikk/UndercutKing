@@ -5,6 +5,7 @@ FramePacerRegression.Run();
 RetainerCaptureRegression.Run();
 MixedQualityRegression.Run();
 NonSaleRegression.Run();
+IpcSnapshotRegression.Run();
 MarketSearchRetryRegression.Run();
 
 var now = DateTimeOffset.UtcNow;

@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../UndercutKing/IpcSnapshot.cs" Link="IpcSnapshot.cs" />
     <Compile Include="../UndercutKing/MarketSearchRetry.cs" Link="MarketSearchRetry.cs" />
     <Compile Include="../UndercutKing/MixedQualityRules.cs" Link="MixedQualityRules.cs" />
     <Compile Include="../UndercutKing/RetainerCaptureRules.cs" Link="RetainerCaptureRules.cs" />
