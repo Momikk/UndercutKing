@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>0.1.2.0</Version>
+    <Version>0.1.2.1</Version>
     <Author>Momikk</Author>
     <Name>压价之王 UndercutKing</Name>
     <Punchline>高亮被压价的雇员物品，改价后及时更新。</Punchline>
@@ -9,8 +9,7 @@
     <IconUrl>https://raw.githubusercontent.com/Momikk/UndercutKing/main/images/icon.png</IconUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <Tags>market;retainer;undercut</Tags>
-    <Changelog>- 新增 IPC，可读取各雇员的压价数量、在售商品及高亮状态，并手动请求刷新报价。
-- Add IPC to read undercut counts, listings, and highlight states per retainer, and request a price refresh.</Changelog>
+    <Changelog>修复市场结果窗口仍在加载时漏掉限流重试的问题。小笼包可读取同一物品的重试状态。&#10;Preserve rate-limit retries while the results window loads. CyberCrabXiaoLongBao can read the retry status for the same item.</Changelog>
     <Nullable>enable</Nullable>
     <CanUnloadAsync>true</CanUnloadAsync>
     <ImplicitUsings>enable</ImplicitUsings>

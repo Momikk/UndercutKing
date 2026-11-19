@@ -4,6 +4,10 @@
 
 This document records changes in published versions. The plugin is an early test release. See the [validation record](docs/validation.md) for build and regression results; in-game appearance and interactions still require validation.
 
+## 0.1.2.1 — 2026-11-19
+
+- Preserve rate-limit retries while the results window loads. CyberCrabXiaoLongBao can read the retry status for the same item.
+
 ## 0.1.2.0 — 2026-11-17
 
 - Add IPC to read undercut counts, listings, and highlight states per retainer, and request a price refresh.

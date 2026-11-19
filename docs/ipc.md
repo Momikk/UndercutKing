@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | `UndercutKing.GetSnapshot` | `() => string` | 返回当前角色的 JSON 快照，`apiVersion` 为 `1`。 |
 | `UndercutKing.RequestRefresh` | `() => bool` | 请求刷新当前角色已扫描商品的 Universalis 报价。 |
+| `UndercutKing.IsMarketSearchRecovering` | `(uint itemId) => bool` | 从 0.1.2.1 起可在游戏线程查询当前物品是否正在等待自动重试或重试回执。该接口只读。 |
 
 ```csharp
 var snapshot = pluginInterface.GetIpcSubscriber<string>("UndercutKing.GetSnapshot");
@@ -45,3 +46,5 @@ bool accepted = refresh.InvokeFunc();
 - `highlightStatus` 是按商品高亮开关和当前背包匹配上下文计算的出售列表颜色。值为 `normal`（原色）、`undercut`（红）、`unknown`（黄）或 `bagMatch`（蓝）。例如同一条挂牌可以被计入压价，界面颜色按优先级显示蓝色。这个字段不代表对应出售窗口正在打开。
 - `RequestRefresh` 返回 `true` 表示已接收请求，结果随快照更新。它与设置中的「刷新报价」共用请求队列和限流规则，同批请求会合并。无可刷新挂牌时返回 `false`，切换角色或登出会清除待处理请求。
 - 压价之王未加载或版本过旧时，调用方应处理 IPC 未注册异常。
+
+调用 `UndercutKing.IsMarketSearchRecovering` 时使用游戏框架线程。结果窗口尚未就绪时最多等待 2 秒，已发出的单次重试最多等待 10 秒回执，超时后返回 `false`。真实服务端限流下的小笼包完整联动尚待复现验收。

@@ -32,6 +32,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     private readonly BagOverlay bagOverlay;
     private readonly BackgroundFrameLimiter backgroundFrameLimiter;
     private readonly MarketSearchRecovery marketSearchRecovery;
+    internal bool IsMarketSearchRecovering(uint item) => marketSearchRecovery.IsRecovering(item);
     private NativeSettingsWindow? main;
     private bool nativeUiReady;
     private readonly DtrCounter dtrCounter;

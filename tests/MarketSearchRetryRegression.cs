@@ -40,6 +40,22 @@ internal static class MarketSearchRetryRegression
         Check(!Take(now.AddSeconds(6)), "Re-enabling does not resume old retry");
         Reject(now); retry.Reset();
         Check(!Take(now.AddSeconds(6)), "Dispose/reset cancels");
+        retry.Observe(1, 2, 100, 0, MarketSearchRetry.RateLimited, 0, now);
+        Check(!retry.Take(1, 2, 100, 0, true, now.AddMilliseconds(500)), "Wait for the result window while it opens");
+        Check(retry.IsRecovering(1, 2, 100, 123), "Pending window recovery is visible to the caller");
+        Check(Take(now.AddSeconds(1)), "The same item can bind its first result window and retry");
+        retry.Reset();
+        retry.Observe(1, 2, 100, 0, MarketSearchRetry.RateLimited, 0, now);
+        Check(!Take(now.AddSeconds(3)), "Late unrelated window cannot inherit the retry");
+        retry.Reset(); Reject(now);
+        Check(Take(now.AddSeconds(1)), "Rejection starts a bounded response wait");
+        Check(retry.IsRecovering(1, 2, 100, 123, now.AddSeconds(2)), "IPC reports the in-flight retry");
+        Check(!retry.IsRecovering(1, 2, 100, 123, now.AddSeconds(11)), "IPC stops waiting when a retry receives no response");
+        Reject(now.AddSeconds(12));
+        Check(!Take(now.AddSeconds(15)), "A late rejection cannot restart a timed-out retry");
+        retry.Reset();
+        retry.Observe(1, 2, 100, 0, MarketSearchRetry.RateLimited, 0, now);
+        Check(!retry.IsRecovering(1, 2, 100, 123, now.AddSeconds(3)), "IPC expires an unbound result window");
         Console.WriteLine($"PASS: {checks} bounded market search retry scenarios");
     }
 }

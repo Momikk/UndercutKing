@@ -33,6 +33,13 @@ internal sealed unsafe class MarketSearchRecovery : IDisposable
         !Plugin.Conditions[ConditionFlag.BoundByDuty] &&
         Plugin.Data.GetExcelSheet<Item>().GetRowOrDefault(item) is { } row && row.ItemSearchCategory.RowId > 0;
 
+    internal bool IsRecovering(uint item)
+    {
+        var search = InfoProxyItemSearch.Instance();
+        return search != null && search->SearchItemId == item && Eligible(item) &&
+            retries.IsRecovering(Plugin.Player.ContentId, Plugin.Objects.LocalPlayer?.CurrentWorld.RowId ?? 0, item, Window());
+    }
+
     private void Observe(uint status, uint count, uint item)
     {
         // Called after the existing packet handler has finished processing the result.
@@ -58,7 +65,7 @@ internal sealed unsafe class MarketSearchRecovery : IDisposable
             if (retries.Take(Plugin.Player.ContentId, world, item, Window(), Eligible(item), DateTimeOffset.UtcNow) && info != null)
             {
                 Plugin.Log.Debug("Retrying rejected market search for item {Item}", item);
-                info->RequestData();
+                if (!info->RequestData()) retries.Reset();
             }
         }
         catch (Exception ex) { retries.Reset(); Plugin.Log.Error(ex, "Market search recovery stopped"); }

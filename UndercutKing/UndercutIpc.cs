@@ -4,6 +4,7 @@ internal sealed class UndercutIpc : IDisposable
 {
     private const string SnapshotEndpoint = "UndercutKing.GetSnapshot";
     private const string RefreshEndpoint = "UndercutKing.RequestRefresh";
+    private const string RecoveryEndpoint = "UndercutKing.IsMarketSearchRecovering";
     private readonly Plugin plugin;
     private IpcSnapshot current = IpcSnapshot.Empty;
     private long requestedCharacter;
@@ -13,6 +14,7 @@ internal sealed class UndercutIpc : IDisposable
         this.plugin = plugin;
         Plugin.Interface.GetIpcProvider<string>(SnapshotEndpoint).RegisterFunc(GetSnapshot);
         Plugin.Interface.GetIpcProvider<bool>(RefreshEndpoint).RegisterFunc(RequestRefresh);
+        Plugin.Interface.GetIpcProvider<uint, bool>(RecoveryEndpoint).RegisterFunc(plugin.IsMarketSearchRecovering);
         Plugin.ClientState.Logout += OnLogout;
     }
 
@@ -50,6 +52,7 @@ internal sealed class UndercutIpc : IDisposable
         Plugin.ClientState.Logout -= OnLogout;
         Clear();
         Plugin.Interface.GetIpcProvider<bool>(RefreshEndpoint).UnregisterFunc();
+        Plugin.Interface.GetIpcProvider<uint, bool>(RecoveryEndpoint).UnregisterFunc();
         Plugin.Interface.GetIpcProvider<string>(SnapshotEndpoint).UnregisterFunc();
     }
 
